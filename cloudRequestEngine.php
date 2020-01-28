@@ -33,7 +33,7 @@ class cloudRequestEngine extends engine {
     public $dataKey = "cloud";
 
     // Default base url
-    public $baseURL = "https://ts.51degrees.com/api/v4/";
+    public $baseURL = "https://cloud.51degrees.com/api/v4/";
 
     public $licenceKey;
     public $resourceKey;
@@ -48,7 +48,7 @@ class cloudRequestEngine extends engine {
 
         $url = $this->baseURL . $this->resourceKey . ".json?" . "license=" . $this->licenceKey . "&";
 
-        $propertiesURL = $this->baseURL . "accessibleProperties?" . "license=" . $this->licenceKey . "&";
+        $propertiesURL = $this->baseURL . "accessibleProperties?" . "resource=" . $this->resourceKey . "&";
 
         $evidence = $flowData->evidence->getAll();
 
