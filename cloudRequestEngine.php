@@ -40,6 +40,26 @@ class cloudRequestEngine extends engine {
 
     private function makeCloudRequest($url){
 
+        if(!function_exists('curl_version')){
+
+            $response = array();
+
+            $response["data"] = @file_get_contents($url);
+
+            if(!$response["data"]){
+
+                $response["error"] = "Cloud request engine request error";
+
+            } else {
+
+                $response["error"] = null;
+
+            }
+
+            return $response;
+
+        };
+
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
