@@ -27,22 +27,6 @@
             "cloudRequestEngine.php"
         ]
     },
-    "repositories": {
-        "engines": {
-            "type": "path",
-            "url": "../FiftyOne.Pipeline.Engines",
-            "options": {
-                "symlink": true
-            }
-        },
-        "core": {
-            "type": "path",
-            "url": "../FiftyOne.Pipeline.Core",
-            "options": {
-                "symlink": true
-            }
-        }
-    },
     "require": {
         "51degrees/fiftyone.pipeline.engines": "@dev",
         "51degrees/fiftyone.pipeline.core": "@dev"

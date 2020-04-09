@@ -38,6 +38,29 @@ class cloudRequestEngine extends engine {
     public $licenceKey;
     public $resourceKey;
 
+    private function makeCloudRequest($url){
+
+        $ch = curl_init($url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, 0);
+        $data = curl_exec($ch);
+        
+        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+       
+        $error = null;
+
+        if(strval($httpCode)[0] !== "2"){
+
+            $error = $httpCode; 
+
+        }
+        
+        curl_close($ch);
+
+        return array("data" => $data, "error" => $error);
+
+    }
+
     public function processInternal($flowData) {
 
         if(!isset($this->resourceKey)){
@@ -71,14 +94,27 @@ class cloudRequestEngine extends engine {
         
         $url .= http_build_query($evidenceWithoutPrefix);
         
-        $result = file_get_contents($url);
+        $result = $this->makeCloudRequest($url);
+                
+        if($result["error"] !== null){
+
+            throw new \Exception("Cloud engine returned " . $result["error"]);
+
+        }
 
         // Get properties for subsequent cloud engines
 
-        $properties = file_get_contents($propertiesURL);
-        $properties = \json_decode($properties, true);
+        $properties = $this->makeCloudRequest($propertiesURL);
+
+        if($properties["error"] !== null){
+
+            throw new \Exception("Cloud engine returned " . $properties["error"]);
+
+        }
+
+        $properties = \json_decode($properties["data"], true);
     
-        $data = new aspectDataDictionary($this, ["cloud" => $result, "properties" => $properties]);
+        $data = new aspectDataDictionary($this, ["cloud" => $result["data"], "properties" => $properties]);
 
         $flowData->setElementData($data);
 
