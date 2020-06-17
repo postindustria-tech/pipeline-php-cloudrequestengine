@@ -1,4 +1,7 @@
 <phpunit>
+  <php>
+    <env name="RESOURCEKEY" value="!!YOUR_RESOURCE_KEY!!"/>
+  </php>
   <testsuites>
     <testsuite name="Tests">
       <file>tests/index.php</file>

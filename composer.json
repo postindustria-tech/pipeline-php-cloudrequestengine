@@ -19,12 +19,13 @@
 			"name": "Joseph Dix",
             "email": "joseph@51degrees.com"
         }
-	],
+    ],
     "license": "EUPL-1.2", 
     "type": "library",
     "autoload": {
         "classmap": [
-            "cloudRequestEngine.php"
+            "CloudRequestEngine.php",
+            "CloudEngine.php"
         ]
     },
     "require": {
