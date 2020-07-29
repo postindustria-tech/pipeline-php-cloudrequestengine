@@ -41,12 +41,12 @@ class CloudRequestEngine extends Engine
     public $flowElementProperties = array();
 
     /**
-    * Constructor for CloudRequestEngine
-    *
-    * @param array settings
-    * Settings should contain a resourceKey
-    * and optionally a cloudEndPoint to overwrite the default baseurl
-    */
+     * Constructor for CloudRequestEngine
+     *
+     * @param array settings
+     * Settings should contain a resourceKey
+     * and optionally a cloudEndPoint to overwrite the default baseurl
+     */
     public function __construct($settings)
     {
         if (isset($settings["resourceKey"])) {
@@ -54,7 +54,7 @@ class CloudRequestEngine extends Engine
         } else {
             throw new \Exception("CloudRequestEngine needs a resource key");
         }
-        
+
         if (isset($settings["cloudEndPoint"])) {
             $this->baseURL = $settings["cloudEndPoint"];
         }
@@ -70,7 +70,7 @@ class CloudRequestEngine extends Engine
      * Internal function for getting evidence keys used by cloud engines
      *
      * @return array list of keys
-    **/
+     **/
     private function getEvidenceKeys()
     {
         $evidenceKeyRequest = $this->makeCloudRequest($this->baseURL . "evidencekeys");
@@ -80,7 +80,7 @@ class CloudRequestEngine extends Engine
         }
 
         $evidenceKeys = \json_decode($evidenceKeyRequest["data"], true);
-        
+
         return $evidenceKeys;
     }
 
@@ -89,7 +89,7 @@ class CloudRequestEngine extends Engine
      * from the cloud service by the private getEvidenceKeys() method
      *
      * @return BasicListEvidenceKeyFilter
-    **/
+     **/
     public function getEvidenceKeyFilter()
     {
         return new BasicListEvidenceKeyFilter($this->evidenceKeys);
@@ -99,7 +99,7 @@ class CloudRequestEngine extends Engine
      * Internal method to get properties for cloud engines from the cloud service
      *
      * @return array
-    **/
+     **/
     private function getEngineProperties()
     {
 
@@ -108,11 +108,11 @@ class CloudRequestEngine extends Engine
         $propertiesURL = $this->baseURL . "accessibleProperties?" . "resource=" . $this->resourceKey;
 
         $properties = $this->makeCloudRequest($propertiesURL);
- 
+
         if ($properties["error"] !== null) {
             throw new \Exception("Cloud request engine properties list request returned " . $properties["error"]);
         }
- 
+
         $properties = \json_decode($properties["data"], true);
 
         $properties = $this->LowerCaseArrayKeys($properties);
@@ -125,7 +125,7 @@ class CloudRequestEngine extends Engine
                 $flowElementProperties[$dataKey][strtolower($meta["name"])] = $meta;
             }
         }
-     
+
         return $flowElementProperties;
     }
 
@@ -134,7 +134,7 @@ class CloudRequestEngine extends Engine
      * cloud service
      *
      * @return array
-    **/
+     **/
     private function lowerCaseArrayKeys($arr)
     {
         return array_map(function ($item) {
@@ -152,36 +152,46 @@ class CloudRequestEngine extends Engine
      * @param string url
      * @return array associative array with data and error properties
      * error contains any errors from the request, data contains the response
-    **/
+     **/
     private function makeCloudRequest($url)
     {
         if (!function_exists('curl_version')) {
-            $response = array();
+        
+            $context = stream_context_create(array(
+                'http' => array(
+                    'ignore_errors' => true
+                 )
+            ));
 
-            $response["data"] = @file_get_contents($url);
+            $data = @file_get_contents($url, false, $context);
+            $error = null;
 
-            if (!$response["data"]) {
-                $response["error"] = "Cloud request engine request error";
+            if ($data) {
+                $json = json_decode($data, true);
+                if (isset($json["errors"]) && count($json["errors"])) {
+                    $error = implode(",", $json["errors"]);
+                }
             } else {
-                $response["error"] = null;
+                $error = "Cloud request engine request error";
             }
 
-            return $response;
+            return array("data" => $data, "error" => $error);
         };
 
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
         $data = curl_exec($ch);
-        
+
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-       
+
         $error = null;
 
-        if (strval($httpCode)[0] !== "2") {
-            $error = $httpCode;
+        if ($httpCode > 399) {
+            $output = json_decode($data);
+            $error = implode(",", $output->errors);
         }
-        
+
         curl_close($ch);
 
         return array("data" => $data, "error" => $error);
@@ -193,7 +203,7 @@ class CloudRequestEngine extends Engine
      * and evidence and returns a JSON object that is then parsed by cloud engines
      * placed later in the pipeline
      * @param FlowData
-    **/
+     **/
     public function processInternal($flowData)
     {
         $url = $this->baseURL . $this->resourceKey . ".json?&";
@@ -211,11 +221,11 @@ class CloudRequestEngine extends Engine
                 $evidenceWithoutPrefix[$keySplit[1]] = $value;
             }
         }
-        
+
         $url .= http_build_query($evidenceWithoutPrefix);
-        
+
         $result = $this->makeCloudRequest($url);
-                
+
         if ($result["error"] !== null) {
             throw new \Exception("Cloud engine returned " . $result["error"]);
         }
