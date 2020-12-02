@@ -5,6 +5,7 @@
   <testsuites>
     <testsuite name="Tests">
       <file>tests/index.php</file>
+      <file>tests/MissingPropertyHandling.php</file>
     </testsuite>
   </testsuites>
 </phpunit>
