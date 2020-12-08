@@ -159,10 +159,7 @@ class MissingPropertyHandling extends TestCase {
         );
 
     private function addResponse($cloud, $flowData, $json) {
-        // todo just create a flowdata?
         $cloudData = new AspectDataDictionary($cloud, ["cloud" => $json]);
         $flowData->setElementData($cloudData);
-        //$flowData->method("get")
-        //        ->willReturn($cloudData);
     }
 }
