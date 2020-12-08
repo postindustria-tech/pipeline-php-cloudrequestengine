@@ -41,6 +41,9 @@ class CloudResponse extends TestCase {
     const evidenceKeysResponse = "[\"query.User-Agent\"]";
     const accessiblePropertiesResponse =
             "{\"Products\": {\"device\": {\"DataTier\": \"tier\",\"Properties\": [{\"Name\": \"value\",\"Type\": \"String\",\"Category\": \"Device\"}]}}}";
+    const invalidKey = "invalidkey";
+    const invalidKeyMessage = "58982060: ".CloudResponse::invalidKey." not a valid resource key";
+    const invalidKeyResponse = "{ \"errors\":[\"".CloudResponse::invalidKeyMessage."\"]}";
     const accessibleSubPropertiesResponse =
         "{\n" .
         "    \"Products\": {\n" .
@@ -142,6 +145,39 @@ class CloudResponse extends TestCase {
         $this->assertTrue($this->propertiesContainName($devicesProperties["devices"]["itemproperties"], "IsTablet"));
     }
 
+    
+    /** 
+     * Test cloud request engine handles errors from the cloud service 
+     * as expected.
+     * An exception should be thrown by the cloud request engine
+     * containing the errors from the cloud service
+     * and the pipeline is configured to throw any exceptions up 
+     * the stack.
+     * We also check that the exception message includes the content 
+     * from the JSON response.
+     */ 
+    public function testValidateErrorHandlingInvalidResourceKey() {
+
+        $httpClient = $this->mockHttp();
+
+        $exception = null;
+
+        try {
+            $engine = new CloudRequestEngine(array(
+                "resourceKey" => CloudResponse::invalidKey,
+                "httpClient" => $httpClient
+            ));
+        }
+        catch (\Exception $ex) {
+            $exception = $ex;
+        }
+
+        $this->assertNotNull("Expected exception to occur", $exception);
+        $this->assertStringContainsString(
+                CloudResponse::invalidKeyMessage,
+                $exception->getMessage());
+    }
+    
     private function propertiesContainName(
             $properties,
             $name) {
@@ -166,6 +202,9 @@ class CloudResponse extends TestCase {
         if (strpos($url, "accessibleProperties") !== false) {
             if (strpos($url, "subpropertieskey") !== false) {
                 return array("data" => CloudResponse::accessibleSubPropertiesResponse, "error" => null);
+            }
+            else if (strpos($url, CloudResponse::invalidKey)) {
+                return array("data" => null, "error" => CloudResponse::invalidKeyResponse);
             }
             else {
                 return array("data" => CloudResponse::accessiblePropertiesResponse, "error" => null);
