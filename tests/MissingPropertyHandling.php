@@ -45,7 +45,7 @@ class MissingPropertyHandling extends TestCase {
         $engine = new CloudEngine();
         $engine->dataKey = "testElement";
 
-        $cloudRequestEngine = $this->createStub(CloudRequestEngine::class);
+        $cloudRequestEngine = $this->createMock(CloudRequestEngine::class);
         $cloudRequestEngine->method("getProperties")
             ->willReturn($this->cloudProperties);
         $cloudRequestEngine->flowElementProperties = array(
@@ -84,7 +84,7 @@ class MissingPropertyHandling extends TestCase {
         $engine = new CloudEngine();
         $engine->dataKey = "testElement";
 
-        $cloudRequestEngine = $this->createStub(CloudRequestEngine::class);
+        $cloudRequestEngine = $this->createMock(CloudRequestEngine::class);
         $cloudRequestEngine->method("getProperties")
             ->willReturn($this->cloudProperties);
         $cloudRequestEngine->flowElementProperties = array(
