@@ -25,9 +25,6 @@ namespace fiftyone\pipeline\cloudrequestengine\tests;
 
 require(__DIR__ . "/../vendor/autoload.php");
 
-require(__DIR__ . "/../CloudRequestEngine.php");
-require(__DIR__ . "/../CloudEngine.php");
-
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\core\PipelineBuilder;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;

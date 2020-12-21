@@ -25,9 +25,6 @@ namespace fiftyone\pipeline\cloudrequestengine\tests;
 
 require(__DIR__ . "/../vendor/autoload.php");
 
-require(__DIR__ . "/../CloudRequestEngine.php");
-require(__DIR__ . "/../CloudEngine.php");
-
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudEngine;
 use fiftyone\pipeline\engines\AspectDataDictionary;
@@ -117,9 +114,11 @@ class MissingPropertyHandling extends TestCase {
             $this->assertEquals(
                 sprintf(
                     MissingPropertyMessages::PREFIX .
-                    MissingPropertyMessages::UNKNOWN,
-                    "property3",
-                    "testElement"),
+                    MissingPropertyMessages::PROPERTY_NOT_IN_CLOUD_RESOURCE,
+                        "property3",
+                        "testElement",
+                        "testElement",
+                        "property1, property2"),
                 $ex->getMessage());
 
         }
