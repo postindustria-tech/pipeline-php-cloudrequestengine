@@ -39,6 +39,8 @@ class CloudRequestEngine extends Engine
     public $baseURL = "https://cloud.51degrees.com/api/v4/";
 
     public $flowElementProperties = array();
+    
+    private $httpClient;
 
     /**
      * Constructor for CloudRequestEngine
@@ -58,6 +60,13 @@ class CloudRequestEngine extends Engine
         if (isset($settings["cloudEndPoint"])) {
             $this->baseURL = $settings["cloudEndPoint"];
         }
+        
+        if (isset($settings["httpClient"])) {
+            $this->httpClient = $settings["httpClient"];
+        }
+        else {
+            $this->httpClient = new HttpClient();
+        }
 
         $this->flowElementProperties = $this->getEngineProperties();
 
@@ -73,7 +82,7 @@ class CloudRequestEngine extends Engine
      **/
     private function getEvidenceKeys()
     {
-        $evidenceKeyRequest = $this->makeCloudRequest($this->baseURL . "evidencekeys");
+        $evidenceKeyRequest = $this->httpClient->makeCloudRequest($this->baseURL . "evidencekeys");
 
         if ($evidenceKeyRequest["error"] !== null) {
             throw new \Exception("Cloud request engine evidence keys request returned " . $evidenceKeyRequest["error"]);
@@ -107,14 +116,14 @@ class CloudRequestEngine extends Engine
 
         $propertiesURL = $this->baseURL . "accessibleProperties?" . "resource=" . $this->resourceKey;
 
-        $properties = $this->makeCloudRequest($propertiesURL);
+        $properties = $this->httpClient->makeCloudRequest($propertiesURL);
 
         if ($properties["error"] !== null) {
             throw new \Exception("Cloud request engine properties list request returned " . $properties["error"]);
         }
 
         $properties = \json_decode($properties["data"], true);
-
+        
         $properties = $this->LowerCaseArrayKeys($properties);
 
         $flowElementProperties = array();
@@ -144,59 +153,7 @@ class CloudRequestEngine extends Engine
             return $item;
         }, array_change_key_case($arr));
     }
-
-    /**
-     * Internal helper method to make a cloud request
-     * uses CURL if available, falls back to file_get_contents
-     *
-     * @param string url
-     * @return array associative array with data and error properties
-     * error contains any errors from the request, data contains the response
-     **/
-    private function makeCloudRequest($url)
-    {
-        if (!function_exists('curl_version')) {
-        
-            $context = stream_context_create(array(
-                'http' => array(
-                    'ignore_errors' => true
-                 )
-            ));
-
-            $data = @file_get_contents($url, false, $context);
-            $error = null;
-
-            if ($data) {
-                $json = json_decode($data, true);
-                if (isset($json["errors"]) && count($json["errors"])) {
-                    $error = implode(",", $json["errors"]);
-                }
-            } else {
-                $error = "Cloud request engine request error";
-            }
-
-            return array("data" => $data, "error" => $error);
-        };
-
-        $ch = curl_init($url);
-        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-        curl_setopt($ch, CURLOPT_HEADER, 0);
-        $data = curl_exec($ch);
-
-        $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-
-        $error = null;
-
-        if ($httpCode > 399) {
-            $output = json_decode($data);
-            $error = implode(",", $output->errors);
-        }
-
-        curl_close($ch);
-
-        return array("data" => $data, "error" => $error);
-    }
-
+    
     /**
      * Processing function for the CloudRequestEngine
      * Makes a request to the cloud service with the supplied resource key
@@ -224,7 +181,7 @@ class CloudRequestEngine extends Engine
 
         $url .= http_build_query($evidenceWithoutPrefix);
 
-        $result = $this->makeCloudRequest($url);
+        $result = $this->httpClient->makeCloudRequest($url);
 
         if ($result["error"] !== null) {
             throw new \Exception("Cloud engine returned " . $result["error"]);

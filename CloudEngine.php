@@ -25,7 +25,7 @@
 namespace fiftyone\pipeline\cloudrequestengine;
 
 use fiftyone\pipeline\engines\AspectDataDictionary;
-use fiftyone\pipeline\engines\Engine;
+use fiftyone\pipeline\engines\CloudEngineBase;
 use fiftyone\pipeline\core\AspectPropertyValue;
 
 /**
@@ -35,7 +35,7 @@ use fiftyone\pipeline\core\AspectPropertyValue;
  * parses it to extract the device part.
  * It also uses this data to generate a list of properties and an evidence key filter
  **/
-class CloudEngine extends Engine
+class CloudEngine extends CloudEngineBase
 {
     public $dataKey = "CloudEngineBase"; // This should be overriden
 
