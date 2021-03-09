@@ -25,6 +25,8 @@
 
 namespace fiftyone\pipeline\cloudrequestengine;
 
+require(__DIR__ . "/Constants.php");
+
 use fiftyone\pipeline\core\BasicListEvidenceKeyFilter;
 use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\Engine;
@@ -36,7 +38,7 @@ class CloudRequestEngine extends Engine
     public $dataKey = "cloud";
 
     // Default base url
-    public $baseURL = "https://cloud.51degrees.com/api/v4/";
+    public $baseURL;
 
     public $flowElementProperties = array();
     
@@ -59,8 +61,23 @@ class CloudRequestEngine extends Engine
 
         if (isset($settings["cloudEndPoint"])) {
             $this->baseURL = $settings["cloudEndPoint"];
+        } else {
+            // Check if base URL is set via environment variable
+            $envVarURL = getenv(Constants::FOD_CLOUD_API_URL);
+            if (!empty($envVarURL)) {
+                $this->baseURL = $envVarURL;
+            } else {
+                // Use default if nothing else is set
+                $this->baseURL = Constants::BASE_URL_DEFAULT;
+            }
         }
         
+        // Make sure the base URL end with '/'
+        $length = strlen($this->baseURL);
+        if ($length > 0 && substr($this->baseURL, $length - 1) != "/" ) {
+            $this->baseURL = $this->baseURL . "/";
+        }
+
         if (isset($settings["httpClient"])) {
             $this->httpClient = $settings["httpClient"];
         }

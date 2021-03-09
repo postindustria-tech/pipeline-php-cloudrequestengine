@@ -6,6 +6,8 @@
     <testsuite name="Tests">
       <file>tests/index.php</file>
       <file>tests/MissingPropertyHandling.php</file>
+      <file>tests/CloudResponse.php</file>
+      <file>tests/CloudRequestEngineTests.php</file>
     </testsuite>
   </testsuites>
 </phpunit>

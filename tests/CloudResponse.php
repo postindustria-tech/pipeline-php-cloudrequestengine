@@ -24,6 +24,7 @@
 namespace fiftyone\pipeline\cloudrequestengine\tests;
 
 require(__DIR__ . "/../vendor/autoload.php");
+require_once(__DIR__ . "/CloudRequestEngineTestsBase.php");
 
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\core\PipelineBuilder;
@@ -31,62 +32,7 @@ use fiftyone\pipeline\cloudrequestengine\HttpClient;
 
 use PHPUnit\Framework\TestCase;
 
-class CloudResponse extends TestCase {
-    
-    const expectedUrl = "https://cloud.51degrees.com/api/v4/resource_key.json";
-    const jsonResponse = "{\"device\":{\"value\":\"1\"}}";
-    const evidenceKeysResponse = "[\"query.User-Agent\"]";
-    const accessiblePropertiesResponse =
-            "{\"Products\": {\"device\": {\"DataTier\": \"tier\",\"Properties\": [{\"Name\": \"value\",\"Type\": \"String\",\"Category\": \"Device\"}]}}}";
-    const invalidKey = "invalidkey";
-    const invalidKeyMessage = "58982060: ".CloudResponse::invalidKey." not a valid resource key";
-    const invalidKeyResponse = "{ \"errors\":[\"".CloudResponse::invalidKeyMessage."\"]}";
-    const accessibleSubPropertiesResponse =
-        "{\n" .
-        "    \"Products\": {\n" .
-        "        \"device\": {\n" .
-        "            \"DataTier\": \"CloudV4TAC\",\n" .
-        "            \"Properties\": [\n" .
-        "                {\n" .
-        "                    \"Name\": \"IsMobile\",\n" .
-        "                        \"Type\": \"Boolean\",\n" .
-        "                        \"Category\": \"Device\"\n" .
-        "                },\n" .
-        "                {\n" .
-        "                    \"Name\": \"IsTablet\",\n" .
-        "                        \"Type\": \"Boolean\",\n" .
-        "                        \"Category\": \"Device\"\n" .
-        "                }\n" .
-        "            ]\n" .
-        "        },\n" .
-        "        \"devices\": {\n" .
-        "            \"DataTier\": \"CloudV4TAC\",\n" .
-        "            \"Properties\": [\n" .
-        "                {\n" .
-        "                    \"Name\": \"Devices\",\n" .
-        "                    \"Type\": \"Array\",\n" .
-        "                    \"Category\": \"Unspecified\",\n" .
-        "                    \"ItemProperties\": [\n" .
-        "                        {\n" .
-        "                            \"Name\": \"IsMobile\",\n" .
-        "                            \"Type\": \"Boolean\",\n" .
-        "                            \"Category\": \"Device\"\n" .
-        "                        },\n" .
-        "                        {\n" .
-        "                            \"Name\": \"IsTablet\",\n" .
-        "                            \"Type\": \"Boolean\",\n" .
-        "                            \"Category\": \"Device\"\n" .
-        "                        }\n" .
-        "                    ]\n" .
-        "                }\n" .
-        "            ]\n" .
-        "        }\n" .
-        "    }\n" .
-        "}";            
-    const resourceKey = "resource_key";
-    const userAgent = "iPhone";
-
-    
+class CloudResponse extends CloudRequestEngineTestsBase {
     /**
      * Test cloud request engine adds correct information to post request
      * and returns the response in the ElementData
@@ -170,55 +116,8 @@ class CloudResponse extends TestCase {
         }
 
         $this->assertNotNull("Expected exception to occur", $exception);
-        $this->assertStringContainsString(
-                CloudResponse::invalidKeyMessage,
-                $exception->getMessage());
-    }
-    
-    private function propertiesContainName(
-            $properties,
-            $name) {
-        foreach ($properties as $property) {
-            if (strcasecmp($property["name"], $name) === 0) {
-                return true;
-            }
-        }
-        return false;
-    }
-    
-    private function mockHttp() {
-        $client = $this->createMock(HttpClient::class);
-        $client->method("makeCloudRequest")
-                ->will($this->returnCallback("fiftyone\pipeline\cloudrequestengine\\tests\CloudResponse::getResponse"));
-        return $client;
-    }
-    
-    public function getResponse() {
-        $args = func_get_args();
-        $url = $args[0];
-        if (strpos($url, "accessibleProperties") !== false) {
-            if (strpos($url, "subpropertieskey") !== false) {
-                return array("data" => CloudResponse::accessibleSubPropertiesResponse, "error" => null);
-            }
-            else if (strpos($url, CloudResponse::invalidKey)) {
-                return array("data" => null, "error" => CloudResponse::invalidKeyResponse);
-            }
-            else {
-                return array("data" => CloudResponse::accessiblePropertiesResponse, "error" => null);
-            }
-        }
-        else if (strpos($url, "evidencekeys") !== false) {
-            return array("data" => CloudResponse::evidenceKeysResponse, "error" => null);
-        }
-        else if (strpos($url, "resource_key.json") !== false) {
-            return array("data" => CloudResponse::jsonResponse, "error" => null);
-        }
-        else {
-            return array(
-                "data" => null,
-                "error" =>
-                "this should not have been called with the URL '"
-                . $url . "'");
-        }
+        $this->assertTrue(
+            strpos($exception->getMessage(), CloudResponse::invalidKeyMessage)
+            != false);
     }
 }
