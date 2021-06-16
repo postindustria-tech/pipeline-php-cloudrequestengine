@@ -37,9 +37,13 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     const testEndPoint="http://testEndPoint/";
     const testEnvVarEndPoint="http://testEnvVarEndPoint/";
 
-    protected function tearDown(): void {
+    /**
+     * @after
+     */
+    protected function tearDowniCloudEndPoint() {
         $this->assertTrue(putenv(Constants::FOD_CLOUD_API_URL));
     }
+
     /**
      * Test the explicit setting of cloudEndPoint via constructor take
      * precedence over environment variable settings.

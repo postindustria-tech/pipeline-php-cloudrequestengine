@@ -124,9 +124,9 @@ class MissingPropertyHandling extends TestCase {
         }
     }
 
-    private const expectedNullReason = "this is the null reason";
+    const expectedNullReason = "this is the null reason";
 
-    private const nullValueJson =
+    const nullValueJson =
         "{\n" .
         "  \"testElement\": {\n" .
         "    \"property1\": \"a value\",\n" .
