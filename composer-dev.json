@@ -1,0 +1,46 @@
+{
+    "name": "51degrees/fiftyone.pipeline.cloudrequestengine",
+    "description": "Cloud request engine for 51Degrees Pipeline API - Used to send requests to the 51Degrees cloud service",
+	"authors" : [
+		{
+			"name": "Filip Hnízdo",
+            "email": "filip@octophin.com",
+            "homepage": "https://octophindigital.com/"
+        },
+		{
+			"name": "Steve Ballantine",
+            "email": "stephen@51degrees.com"
+        },
+		{
+			"name": "Ben Shilito",
+            "email": "ben@51degrees.com"
+        },
+		{
+			"name": "Joseph Dix",
+            "email": "joseph@51degrees.com"
+        }
+    ],
+    "license": "EUPL-1.2", 
+    "type": "library",
+    "autoload": {
+        "classmap": [
+            "CloudRequestEngine.php",
+            "CloudEngine.php",
+            "HttpClient.php"
+        ]
+    },
+	"repositories": [
+		{
+			"type": "path",
+			"url": "pipeline-php-engines"
+		},
+		{
+			"type": "path",
+			"url": "pipeline-php-core"
+		}
+	],
+    "require": {
+        "51degrees/fiftyone.pipeline.engines": "@dev",
+        "51degrees/fiftyone.pipeline.core": "@dev"
+    }
+}
