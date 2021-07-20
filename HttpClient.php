@@ -7,16 +7,23 @@ class HttpClient {
      * uses CURL if available, falls back to file_get_contents
      *
      * @param string url
+     * @param string originHeader The value to use for the Origin header
      * @return array associative array with data and error properties
      * error contains any errors from the request, data contains the response
      **/
-    public function makeCloudRequest($url)
+    public function makeCloudRequest($url, $originHeader)
     {
+        $headerText = '';
+        if(isset($originHeader)) {
+            $headerText = 'Origin: ' . $originHeader;
+        }
+
         if (!function_exists('curl_version')) {
         
             $context = stream_context_create(array(
                 'http' => array(
-                    'ignore_errors' => true
+                    'ignore_errors' => true,
+                    'header' => $headerText
                  )
             ));
 
@@ -38,6 +45,11 @@ class HttpClient {
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_HEADER, 0);
+        if(isset($originHeader)) {
+            curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+                $headerText
+            ));
+        }
         $data = curl_exec($ch);
 
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);

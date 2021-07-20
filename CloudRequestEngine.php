@@ -40,6 +40,8 @@ class CloudRequestEngine extends Engine
     // Default base url
     public $baseURL;
 
+    public $cloudRequestOrigin;
+
     public $flowElementProperties = array();
     
     private $httpClient;
@@ -49,7 +51,9 @@ class CloudRequestEngine extends Engine
      *
      * @param array settings
      * Settings should contain a resourceKey
-     * and optionally a cloudEndPoint to overwrite the default baseurl
+     * and optionally:
+     * 1) a cloudEndPoint to overwrite the default baseurl
+     * 2) an cloudRequestOrigin to use when sending requests to cloud
      */
     public function __construct($settings)
     {
@@ -85,9 +89,14 @@ class CloudRequestEngine extends Engine
             $this->httpClient = new HttpClient();
         }
 
+        if (isset($settings["cloudRequestOrigin"])) {
+            $this->cloudRequestOrigin = $settings["cloudRequestOrigin"];
+        }
+
         $this->flowElementProperties = $this->getEngineProperties();
 
         $this->evidenceKeys = $this->getEvidenceKeys();
+
 
         parent::__construct($settings);
     }
@@ -99,7 +108,9 @@ class CloudRequestEngine extends Engine
      **/
     private function getEvidenceKeys()
     {
-        $evidenceKeyRequest = $this->httpClient->makeCloudRequest($this->baseURL . "evidencekeys");
+        $evidenceKeyRequest = $this->httpClient->makeCloudRequest(
+            $this->baseURL . "evidencekeys", 
+            $this->cloudRequestOrigin);
 
         if ($evidenceKeyRequest["error"] !== null) {
             throw new \Exception("Cloud request engine evidence keys request returned " . $evidenceKeyRequest["error"]);
@@ -133,7 +144,9 @@ class CloudRequestEngine extends Engine
 
         $propertiesURL = $this->baseURL . "accessibleProperties?" . "resource=" . $this->resourceKey;
 
-        $properties = $this->httpClient->makeCloudRequest($propertiesURL);
+        $properties = $this->httpClient->makeCloudRequest(
+            $propertiesURL, 
+            $this->cloudRequestOrigin);
 
         if ($properties["error"] !== null) {
             throw new \Exception("Cloud request engine properties list request returned " . $properties["error"]);
@@ -198,7 +211,7 @@ class CloudRequestEngine extends Engine
 
         $url .= http_build_query($evidenceWithoutPrefix);
 
-        $result = $this->httpClient->makeCloudRequest($url);
+        $result = $this->httpClient->makeCloudRequest($url, $this->cloudRequestOrigin);
 
         if ($result["error"] !== null) {
             throw new \Exception("Cloud engine returned " . $result["error"]);
