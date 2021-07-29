@@ -28,4 +28,37 @@ class Constants {
     const FOD_CLOUD_API_URL = "FOD_CLOUD_API_URL";
     // Default base url
     const BASE_URL_DEFAULT = "https://cloud.51degrees.com/api/v4/";
+
+    // No Data in response message to be set in exception when cloud neither
+    // return any data nor any error messages
+    const MESSAGE_NO_DATA_IN_RESPONSE = "No data in response from cloud service at %s";
+	
+    // Message when multiple errors are returned from cloud service
+    const EXCEPTION_CLOUD_ERRORS_MULTIPLE = 
+            "Multiple errors returned from 51Degrees cloud service. See inner " .
+            "exceptions for details.";
+
+    // Message when single error is returned from cloud service
+    const EXCEPTION_CLOUD_ERROR = 
+            "Error returned from 51Degrees cloud service: '%s'";
+
+    // Evidence key seperator
+    const EVIDENCE_SEPERATOR = ".";
+
+    // Used to prefix evidence that is obtained from HTTP headers 
+    const EVIDENCE_HTTPHEADER_PREFIX = "header";
+
+    // Used to prefix evidence that is obtained from HTTP bookies 
+    const EVIDENCE_COOKIE_PREFIX = "cookie";
+
+    // Used to prefix evidence that is obtained from an HTTP request's
+    // query string or is passed into the pipeline for off-line 
+    // processing.
+    const EVIDENCE_QUERY_PREFIX = "query";
+
+    // other evidence constant
+    const EVIDENCE_OTHER = "other";
+    
+    // warning message to be shown for conflicted evidences
+    const WARNING_MESSAGE = "'%s=>%s' evidence conflicts with ";
 }

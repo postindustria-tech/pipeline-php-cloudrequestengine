@@ -122,4 +122,153 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
             $testNoSlashUrl . "/",
             $engine->baseURL);
     }
+
+    // Data Provider for testGetSelectedEvidence
+	public function provider_testGetSelectedEvidence()
+    {
+        return array(
+        array(array("query.User-Agent"=>"iPhone", "header.User-Agent"=>"iPhone"), "query",  array("query.User-Agent" =>"iPhone")),
+        array(array("header.User-Agent"=>"iPhone", "a.User-Agent"=>"iPhone", "z.User-Agent"=>"iPhone"), "other",  array("z.User-Agent"=>"iPhone", "a.User-Agent"=>"iPhone"))
+        );
+    }
+
+    /**
+     * Test evidence of specific type is returned from all
+     * the evidence passed, if type is not from query, header
+     * or cookie then evidences are returned sorted in descending order
+     * @dataProvider provider_testGetSelectedEvidence
+     */
+    public function testGetSelectedEvidence($evidence, $type, $expectedValue) {
+
+        $httpClient = $this->mockHttp();
+
+        $engine = new CloudRequestEngine(array(
+            "resourceKey" => CloudRequestEngineTests::resourceKey,
+            "httpClient" => $httpClient));
+
+        $result = $engine->getSelectedEvidence($evidence, $type);
+        $this->assertEquals($expectedValue, $result);
+    }
+
+    // Data Provider for testGetContent_nowarning
+	public function provider_testGetContent_nowarning()
+    {
+        return array(
+            array(array("query.User-Agent" => "query-iPhone", "header.user-agent" => "header-iPhone"), "query-iPhone"),
+            array(array("query.User-Agent" => "query-iPhone", "cookie.User-Agent" => "cookie-iPhone"), "query-iPhone"),
+            array(array("query.User-Agent" => "query-iPhone", "a.User-Agent" => "a-iPhone"), "query-iPhone")
+        );
+    }
+
+    /**
+     * Test Content to send in the POST request is generated as
+     * per the precedence rule of The evidence keys. Verify that query
+     * evidence overwrite other evidences without any warning logged.
+     * @dataProvider provider_testGetContent_nowarning
+     */
+    public function testGetContent_nowarning($evidence, $expectedValue) {
+
+        $httpClient = $this->mockHttp();
+
+        $engine = new CloudRequestEngine(array(
+            "resourceKey" => CloudRequestEngineTests::resourceKey,
+            "httpClient" => $httpClient));
+
+        $pipeline = new PipelineBuilder();
+
+        $pipeline = $pipeline->add($engine)->build();
+
+        $data = $pipeline->createFlowData();
+
+        foreach($evidence as $key => $value){
+            $data->evidence->set($key, $value);
+        }
+        
+        $result = $engine->getContent($data);
+        $this->assertEquals($expectedValue, $result["user-agent"]);
+    }
+
+    // Data Provider for testGetContent_warnings
+	public function provider_testGetContent_warnings()
+    {
+        return array(
+            array(array("header.User-Agent" => "header-iPhone", "cookie.User-Agent" => "cookie-iPhone"), "header-iPhone"),
+            array(array("a.User-Agent" => "a-iPhone", "b.User-Agent" => "b-iPhone", "z.User-Agent" => "z-iPhone"), "a-iPhone"),
+            array(array("query.User-Agent" => "query-iPhone","header.User-Agent" => "header-iPhone", "cookie.User-Agent" => "cookie-iPhone", "a.User-Agent" => "a-iPhone"), "query-iPhone")
+        );
+    }
+
+    /**
+     * Test Content to send in the POST request is generated as
+     * per the precedence rule of The evidence keys. These are
+     * added to the evidence in reverse order, if there is conflict then 
+     * the queryData value is overwritten and warnings are logged.
+     * @dataProvider provider_testGetContent_warnings
+     */
+    public function testGetContent_warnings($evidence, $expectedValue) {
+
+        $httpClient = $this->mockHttp();
+
+        $engine = new CloudRequestEngine(array(
+            "resourceKey" => CloudRequestEngineTests::resourceKey,
+            "httpClient" => $httpClient));
+
+        $pipeline = new PipelineBuilder();
+
+        $pipeline = $pipeline->add($engine)->build();
+
+        $data = $pipeline->createFlowData();
+
+        foreach($evidence as $key => $value){
+            $data->evidence->set($key, $value);
+        }
+        
+        $this->assertEquals($expectedValue, @$engine->getContent($data)["user-agent"]);
+        
+        try {
+            $engine->getContent($data);
+        } catch (\Exception $e) {
+            $this->assertTrue(strpos($e->getMessage(), "evidence conflicts with") !== false);
+        }
+    }
+
+    // Data Provider for testGetContent_case_insensitive
+	public function provider_testGetContent_case_insensitive()
+    {
+        return array(
+            array(array("query.User-Agent" => "iPhone1", "Query.user-agent" => "iPhone2"), "iPhone2"),
+            array(array("a.User-Agent" => "iPhone1", "A.user-agent" => "iPhone2"), "iPhone2")
+        );
+    }
+
+    /**
+     * Test Content to send in the POST request is generated as
+     * per the precedence rule of The evidence keys. Verify that 
+     * comparison is case insensitive and evidence values will
+     * overwritten without any warning logged.
+     * @dataProvider provider_testGetContent_case_insensitive
+     */
+    public function testGetContent_case_insensitive($evidence, $expectedValue) {
+
+        $httpClient = $this->mockHttp();
+
+        $engine = new CloudRequestEngine(array(
+            "resourceKey" => CloudRequestEngineTests::resourceKey,
+            "httpClient" => $httpClient));
+
+        $pipeline = new PipelineBuilder();
+
+        $pipeline = $pipeline->add($engine)->build();
+
+        $data = $pipeline->createFlowData();
+
+        foreach($evidence as $key => $value){
+            $data->evidence->set($key, $value);
+        }
+        
+        $result = $engine->getContent($data);
+        $this->assertEquals($expectedValue, $result["user-agent"]);
+    }
+
 }
+

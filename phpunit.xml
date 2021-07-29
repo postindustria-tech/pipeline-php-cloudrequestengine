@@ -1,13 +1,15 @@
-<phpunit>
+<phpunit
+    convertErrorsToExceptions   = "true"
+    convertWarningsToExceptions = "true">
   <php>
     <env name="RESOURCEKEY" value="!!YOUR_RESOURCE_KEY!!"/>
   </php>
   <testsuites>
     <testsuite name="Tests">
       <file>tests/index.php</file>
-      <file>tests/MissingPropertyHandling.php</file>
       <file>tests/CloudResponse.php</file>
       <file>tests/CloudRequestEngineTests.php</file>
+      <file>tests/MissingPropertyHandling.php</file>                  
     </testsuite>
   </testsuites>
 </phpunit>

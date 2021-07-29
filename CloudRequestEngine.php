@@ -109,7 +109,9 @@ class CloudRequestEngine extends Engine
     private function getEvidenceKeys()
     {
         $evidenceKeyRequest = $this->httpClient->makeCloudRequest(
-            $this->baseURL . "evidencekeys", 
+            "GET",
+            $this->baseURL . "evidencekeys",
+            null, 
             $this->cloudRequestOrigin);
 
         if ($evidenceKeyRequest["error"] !== null) {
@@ -145,7 +147,9 @@ class CloudRequestEngine extends Engine
         $propertiesURL = $this->baseURL . "accessibleProperties?" . "resource=" . $this->resourceKey;
 
         $properties = $this->httpClient->makeCloudRequest(
-            $propertiesURL, 
+            "GET",
+            $propertiesURL,
+            null,
             $this->cloudRequestOrigin);
 
         if ($properties["error"] !== null) {
@@ -193,25 +197,11 @@ class CloudRequestEngine extends Engine
      **/
     public function processInternal($flowData)
     {
-        $url = $this->baseURL . $this->resourceKey . ".json?&";
+        $url = $this->baseURL . $this->resourceKey . ".json?";
 
-        $evidence = $flowData->evidence->getAll();
+        $content = http_build_query($this->getContent($flowData));
 
-        // Remove prefix from evidence
-
-        $evidenceWithoutPrefix = array();
-
-        foreach ($evidence as $key => $value) {
-            $keySplit = explode(".", $key);
-
-            if (isset($keySplit[1])) {
-                $evidenceWithoutPrefix[$keySplit[1]] = $value;
-            }
-        }
-
-        $url .= http_build_query($evidenceWithoutPrefix);
-
-        $result = $this->httpClient->makeCloudRequest($url, $this->cloudRequestOrigin);
+        $result = $this->httpClient->makeCloudRequest("POST", $url, $content, $this->cloudRequestOrigin);
 
         if ($result["error"] !== null) {
             throw new \Exception("Cloud engine returned " . $result["error"]);
@@ -222,5 +212,130 @@ class CloudRequestEngine extends Engine
         $flowData->setElementData($data);
 
         return;
+    }
+
+    /**
+     * Generate the Content to send in the POST request. The evidence keys
+     * e.g. 'query.' and 'header.' have an order of precedence. These are
+     * added to the evidence in reverse order, if there is conflict then 
+     * the queryData value is overwritten.
+     * 
+     * 'query.' evidence should take precedence over all other evidence.
+     * If there are evidence keys other than 'query.' that conflict then
+     * this is unexpected so a warning will be logged.
+     * @param FlowData
+     * @return Array
+     **/
+    public function getContent($flowData) {
+        
+        $queryData = array();
+
+        $evidence = $flowData->evidence->getAll();
+
+        // Add evidence in reverse alphabetical order, excluding special keys. 
+        $queryData = $this->addQueryData($queryData, $evidence, $this->getSelectedEvidence($evidence, Constants::EVIDENCE_OTHER));
+        // Add cookie evidence.
+        $queryData = $this->addQueryData($queryData, $evidence, $this->getSelectedEvidence($evidence, Constants::EVIDENCE_COOKIE_PREFIX));
+        // Add header evidence.
+        $queryData = $this->addQueryData($queryData, $evidence, $this->getSelectedEvidence($evidence, Constants::EVIDENCE_HTTPHEADER_PREFIX));
+        // Add query evidence.
+        $queryData = $this->addQueryData($queryData, $evidence, $this->getSelectedEvidence($evidence, Constants::EVIDENCE_QUERY_PREFIX));
+
+        return $queryData;
+    }
+
+    /**
+     * Add query data to the evidence.
+     * @param queryData The destination Array to add query data to.
+     * @param allEvidence All evidence in the flow data. This is used to report 
+     * which evidence keys are conflicting.
+     * @param evidence Evidence to add to the query Data.
+     **/
+    public function addQueryData($queryData, $allEvidence, $evidence) {
+
+        foreach ($evidence as $evidenceKey => $evidenceValue) {
+            // Get the key parts
+            $evidenceKeyParts = explode(Constants::EVIDENCE_SEPERATOR, $evidenceKey);
+            $prefix = strtolower($evidenceKeyParts[0]);
+            $suffix = strtolower(end($evidenceKeyParts));
+
+            // Check and add the evidence to the query parameters.
+            if (!array_key_exists($suffix, $queryData)) {
+                $queryData[$suffix] = $evidenceValue;
+            }           
+            // If the queryParameter exists already.
+            else {
+                // Get the conflicting pieces of evidence and then log a 
+                // warning, if the evidence prefix is not query. Otherwise a
+                // warning is not needed as query evidence is expected 
+                // to overwrite any existing evidence with the same suffix.
+                if (strcmp($prefix, Constants::EVIDENCE_QUERY_PREFIX) !== 0){
+                    $conflicts = array();
+                    $conflictStr = "";
+
+                    foreach ($allEvidence as $key => $value) {
+                        if (strcasecmp($key, $evidenceKey) !== 0 && stripos($key, $suffix) !== false) {
+                            $conflicts[$key] = $value;
+                        }
+                    }
+                    $warningMessage = sprintf(Constants::WARNING_MESSAGE, $evidenceKey, $evidenceValue);
+
+                    foreach ($conflicts as $key => $value) {       
+                        if(!empty($conflictStr)) {
+                            $conflictStr .= ", ";
+                        }                
+                        $conflictStr .= sprintf("%s=>%s", $key, $value);
+                    }
+                    if(!empty($conflictStr)) {
+                        trigger_error($warningMessage . $conflictStr, E_USER_WARNING);
+                    }                  
+                }   
+
+            // Overwrite the existing queryParameter value.
+            $queryData[$suffix] = $evidenceValue;             
+            }
+        }
+        return $queryData;
+    }
+
+    /**
+     * Get evidence with specified prefix.
+     * @param evidence: All evidence in the flow data.
+     * @param type: Required evidence key prefix
+     **/
+    public function getSelectedEvidence($evidence, $type) {
+        
+        $selectedEvidence = array();
+        if (strcmp($type, Constants::EVIDENCE_OTHER) == 0) {
+            foreach ($evidence as $key => $value) {
+
+                if (!$this->keyHasPrefix($key, Constants::EVIDENCE_QUERY_PREFIX) &&
+                        !$this->keyHasPrefix($key, Constants::EVIDENCE_HTTPHEADER_PREFIX) && 
+                            !$this->keyHasPrefix($key, Constants::EVIDENCE_COOKIE_PREFIX)) {
+                                $selectedEvidence[$key] = $value;
+                                
+                }
+            }
+            krsort($selectedEvidence);           
+        }
+        else {
+            foreach ($evidence as $key => $value) {
+                if ($this->keyHasPrefix($key, $type)) {
+                    $selectedEvidence[$key] = $value;
+                }
+            }
+        }
+        return $selectedEvidence;
+    }
+
+    /**
+     * Check that the key of a KeyValuePair has the given prefix.
+     * @param itemKey: Key to check
+     * @param prefix: The prefix to check for.
+     * @return: True if the key has the prefix.
+     **/
+    public function keyHasPrefix($itemKey, $prefix) {
+        $key = explode(Constants::EVIDENCE_SEPERATOR, $itemKey);
+        return (strcasecmp($key[0], $prefix) == 0);
     }
 }

@@ -41,6 +41,10 @@ class CloudRequestEngineTestsBase extends TestCase {
     const invalidKey = "invalidkey";
     const invalidKeyMessage = "58982060: ".CloudResponse::invalidKey." not a valid resource key";
     const invalidKeyResponse = "{ \"errors\":[\"".CloudResponse::invalidKeyMessage."\"]}";
+    const noDataKey = "nodatakey";
+    const noDataKeyResponse = "{}";
+    const noDataKeyMessageComplete = "Error returned from 51Degrees cloud service: 'No data in response " .
+        "from cloud service at https://cloud.51degrees.com/api/v4/accessibleProperties?resource=nodatakey'";    
     const accessibleSubPropertiesResponse =
         "{\n" .
         "    \"Products\": {\n" .
@@ -106,13 +110,16 @@ class CloudRequestEngineTestsBase extends TestCase {
     
     public static function getResponse() {
         $args = func_get_args();
-        $url = $args[0];
+        $url = $args[1];
         if (strpos($url, "accessibleProperties") !== false) {
             if (strpos($url, "subpropertieskey") !== false) {
                 return array("data" => CloudResponse::accessibleSubPropertiesResponse, "error" => null);
             }
             else if (strpos($url, CloudResponse::invalidKey)) {
                 return array("data" => null, "error" => CloudResponse::invalidKeyResponse);
+            }
+            else if (strpos($url, CloudResponse::noDataKey)) {
+                return array("data" => null, "error" => CloudResponse::noDataKeyResponse);
             }
             else {
                 return array("data" => CloudResponse::accessiblePropertiesResponse, "error" => null);
