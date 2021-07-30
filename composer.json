@@ -31,6 +31,7 @@
     },
     "require": {
         "51degrees/fiftyone.pipeline.engines": "4.*",
-        "51degrees/fiftyone.pipeline.core": "4.*"
+        "51degrees/fiftyone.pipeline.core": "4.*",
+        "nodejs-php-fallback/uglify": "^1.0"
     }
 }

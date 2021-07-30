@@ -120,4 +120,36 @@ class CloudResponse extends CloudRequestEngineTestsBase {
             strpos($exception->getMessage(), CloudResponse::invalidKeyMessage)
             != false);
     }
+
+    /** 
+     * Test cloud request engine handles a lack of data from the
+     * cloud service as expected.
+     * An exception should be thrown by the cloud request engine
+     * containing the errors from the cloud service
+     * and the pipeline is configured to throw any exceptions up 
+     * the stack.
+     * We also check that the exception message includes the content 
+     * from the JSON response.
+     */ 
+    public function testValidateErrorHandlingNoData() {
+
+        $httpClient = $this->mockHttp();
+
+        $exception = null;
+
+        try {
+            $engine = new CloudRequestEngine(array(
+                "resourceKey" => CloudResponse::noDataKey,
+                "httpClient" => $httpClient
+            ));
+        }
+        catch (\Exception $ex) {
+            $exception = $ex;
+        }
+
+        $this->assertNotNull("Expected exception to occur", $exception);
+        $this->assertTrue(
+            strpos($exception->getMessage(), CloudResponse::noDataKeyResponse)
+            != false);
+    }
 }
