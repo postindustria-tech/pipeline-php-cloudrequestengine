@@ -25,10 +25,12 @@ require(__DIR__ . "/../vendor/autoload.php");
 
 require(__DIR__ . "/../CloudRequestEngine.php");
 require(__DIR__ . "/../CloudEngine.php");
+require(__DIR__ . "/../CloudRequestException.php");
 require(__DIR__ . "/../HttpClient.php");
 
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudEngine;
+use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
 use fiftyone\pipeline\core\PipelineBuilder;
 
@@ -169,15 +171,44 @@ class CloudRequestEngineTests extends TestCase
 
         $url .= http_build_query($evidenceWithoutPrefix);
 
-        $result = $httpClient->makeCloudRequest("GET", $url, null, null);
-
         // Following statements should be removed once error
         // is fixed in cloud
-        $this->assertTrue($result["error"] !== null);       
-        $this->assertTrue(strpos($result["error"], "Sequence number not present in evidence. this is mandatory.") !== false);
+        try {
+            $result = $httpClient->makeCloudRequest("GET", $url, null, null);
+        }
+        catch (CloudRequestException $e) {
+            $this->assertTrue($e->getMessage() !== null);       
+            $this->assertTrue(strpos($e->getMessage(), "Sequence number not present in evidence. this is mandatory.") !== false);    
+        }
 
         // Following statement should be uncommented once error
         // is fixed in cloud
-        //$this->assertTrue(empty($result["error"]));
+        // $result = $httpClient->makeCloudRequest("GET", $url, null, null);
+        // $result = \json_decode($result, true);
+        // $this->assertTrue(empty($result["errors"]));
     }
+
+    /**
+     *  Check that errors from the cloud service will cause the        
+     *  appropriate data to be set in the CloudRequestException.
+     */
+    public function testHttpDataSetInException() {
+
+        $params = array("resourceKey" => "resource_key");
+
+        $pipeline = new PipelineBuilder();
+
+        try {
+            $cloud = new CloudRequestEngine($params);
+            $cloud->setRestrictedProperties(array("cloud"));
+            $pipeline = $pipeline->add($cloud)->add($engine)->build();
+            $this->fail("Expected exception did not occur");
+        }
+        catch(CloudRequestException $e) {
+            $this->assertTrue($e->httpStatusCode > 0, "Status code should not be 0");
+            $this->assertTrue(isset($e->responseHeaders), "Response headers not populated");
+            $this->assertTrue(count($e->responseHeaders) > 0, "Response headers not populated");   
+        }
+    } 
+
 }

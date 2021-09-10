@@ -114,11 +114,7 @@ class CloudRequestEngine extends Engine
             null, 
             $this->cloudRequestOrigin);
 
-        if ($evidenceKeyRequest["error"] !== null) {
-            throw new \Exception("Cloud request engine evidence keys request returned " . $evidenceKeyRequest["error"]);
-        }
-
-        $evidenceKeys = \json_decode($evidenceKeyRequest["data"], true);
+        $evidenceKeys = \json_decode($evidenceKeyRequest, true);
 
         return $evidenceKeys;
     }
@@ -152,11 +148,7 @@ class CloudRequestEngine extends Engine
             null,
             $this->cloudRequestOrigin);
 
-        if ($properties["error"] !== null) {
-            throw new \Exception("Cloud request engine properties list request returned " . $properties["error"]);
-        }
-
-        $properties = \json_decode($properties["data"], true);
+        $properties = \json_decode($properties, true);
         
         $properties = $this->LowerCaseArrayKeys($properties);
 
@@ -203,11 +195,7 @@ class CloudRequestEngine extends Engine
 
         $result = $this->httpClient->makeCloudRequest("POST", $url, $content, $this->cloudRequestOrigin);
 
-        if ($result["error"] !== null) {
-            throw new \Exception("Cloud engine returned " . $result["error"]);
-        }
-
-        $data = new AspectDataDictionary($this, ["cloud" => $result["data"]]);
+        $data = new AspectDataDictionary($this, ["cloud" => $result]);
 
         $flowData->setElementData($data);
 
