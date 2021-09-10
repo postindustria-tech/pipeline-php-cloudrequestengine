@@ -27,6 +27,7 @@ require(__DIR__ . "/../vendor/autoload.php");
 require_once(__DIR__ . "/CloudRequestEngineTestsBase.php");
 
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
+use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
 use fiftyone\pipeline\core\PipelineBuilder;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
 
@@ -75,8 +76,7 @@ class CloudResponse extends CloudRequestEngineTestsBase {
             "httpClient" => $httpClient));
 
         $this->assertEquals(2, count($engine->flowElementProperties));
-
-        
+       
         $deviceProperties = $engine->flowElementProperties["device"];
         $this->assertEquals(2, count($deviceProperties));
         $this->assertTrue($this->propertiesContainName($deviceProperties, "IsMobile"));
@@ -111,7 +111,7 @@ class CloudResponse extends CloudRequestEngineTestsBase {
                 "httpClient" => $httpClient
             ));
         }
-        catch (\Exception $ex) {
+        catch (CloudRequestException $ex) {
             $exception = $ex;
         }
 
@@ -143,13 +143,11 @@ class CloudResponse extends CloudRequestEngineTestsBase {
                 "httpClient" => $httpClient
             ));
         }
-        catch (\Exception $ex) {
+        catch (CloudRequestException $ex) {
             $exception = $ex;
         }
 
         $this->assertNotNull("Expected exception to occur", $exception);
-        $this->assertTrue(
-            strpos($exception->getMessage(), CloudResponse::noDataKeyResponse)
-            != false);
+        $this->assertEquals($exception->getMessage(), CloudResponse::noDataKeyMessageComplete);
     }
 }

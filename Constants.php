@@ -42,6 +42,9 @@ class Constants {
     const EXCEPTION_CLOUD_ERROR = 
             "Error returned from 51Degrees cloud service: '%s'";
 
+    // Error message when non-success status is returned.
+    const MESSAGE_ERROR_CODE_RETURNED = "Cloud service at '%s' returned status code '%s' with content %s";
+
     // Evidence key seperator
     const EVIDENCE_SEPERATOR = ".";
 

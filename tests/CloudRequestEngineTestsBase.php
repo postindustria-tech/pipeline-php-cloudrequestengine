@@ -26,6 +26,7 @@ namespace fiftyone\pipeline\cloudrequestengine\tests;
 require(__DIR__ . "/../vendor/autoload.php");
 
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
+use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
 use fiftyone\pipeline\core\PipelineBuilder;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
 
@@ -113,30 +114,26 @@ class CloudRequestEngineTestsBase extends TestCase {
         $url = $args[1];
         if (strpos($url, "accessibleProperties") !== false) {
             if (strpos($url, "subpropertieskey") !== false) {
-                return array("data" => CloudResponse::accessibleSubPropertiesResponse, "error" => null);
+                return CloudResponse::accessibleSubPropertiesResponse;
             }
             else if (strpos($url, CloudResponse::invalidKey)) {
-                return array("data" => null, "error" => CloudResponse::invalidKeyResponse);
+                throw new CloudRequestException( CloudResponse::invalidKeyResponse );
             }
             else if (strpos($url, CloudResponse::noDataKey)) {
-                return array("data" => null, "error" => CloudResponse::noDataKeyResponse);
+                throw new CloudRequestException( CloudResponse::noDataKeyMessageComplete );
             }
             else {
-                return array("data" => CloudResponse::accessiblePropertiesResponse, "error" => null);
+                return CloudResponse::accessiblePropertiesResponse;
             }
         }
         else if (strpos($url, "evidencekeys") !== false) {
-            return array("data" => CloudResponse::evidenceKeysResponse, "error" => null);
+            return CloudResponse::evidenceKeysResponse;
         }
         else if (strpos($url, "resource_key.json") !== false) {
-            return array("data" => CloudResponse::jsonResponse, "error" => null);
+            return CloudResponse::jsonResponse;
         }
         else {
-            return array(
-                "data" => null,
-                "error" =>
-                "this should not have been called with the URL '"
-                . $url . "'");
+            throw new CloudRequestException( "this should not have been called with the URL '" . $url . "'" );
         }
     }
 }

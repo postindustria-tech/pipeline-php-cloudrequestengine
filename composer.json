@@ -25,7 +25,9 @@
     "autoload": {
         "classmap": [
             "CloudRequestEngine.php",
+			"CloudRequestException.php",
             "CloudEngine.php",
+			"Constants.php",
             "HttpClient.php"
         ]
     },
