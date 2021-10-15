@@ -33,6 +33,8 @@ stages:
           phpVersion: 7.3
         PHP 7.4:
           phpVersion: 7.4
+        PHP 8.0:
+          phpVersion: 8.0
 
     steps:
     - checkout: self
