@@ -171,21 +171,9 @@ class CloudRequestEngineTests extends TestCase
 
         $url .= http_build_query($evidenceWithoutPrefix);
 
-        // Following statements should be removed once error
-        // is fixed in cloud
-        try {
-            $result = $httpClient->makeCloudRequest("GET", $url, null, null);
-        }
-        catch (CloudRequestException $e) {
-            $this->assertTrue($e->getMessage() !== null);       
-            $this->assertTrue(strpos($e->getMessage(), "Sequence number not present in evidence. this is mandatory.") !== false);    
-        }
-
-        // Following statement should be uncommented once error
-        // is fixed in cloud
-        // $result = $httpClient->makeCloudRequest("GET", $url, null, null);
-        // $result = \json_decode($result, true);
-        // $this->assertTrue(empty($result["errors"]));
+        $result = $httpClient->makeCloudRequest("GET", $url, null, null);
+        $result = \json_decode($result, true);
+        $this->assertTrue(empty($result["errors"]));
     }
 
     /**
