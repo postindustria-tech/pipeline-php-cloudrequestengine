@@ -124,7 +124,7 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     }
 
     // Data Provider for testGetSelectedEvidence
-	public function provider_testGetSelectedEvidence()
+	public static function provider_testGetSelectedEvidence()
     {
         return array(
         array(array("query.User-Agent"=>"iPhone", "header.User-Agent"=>"iPhone"), "query",  array("query.User-Agent" =>"iPhone")),
@@ -151,7 +151,7 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     }
 
     // Data Provider for testGetContent_nowarning
-	public function provider_testGetContent_nowarning()
+	public static function provider_testGetContent_nowarning()
     {
         return array(
             array(array("query.User-Agent" => "query-iPhone", "header.user-agent" => "header-iPhone"), "query-iPhone"),
@@ -189,7 +189,7 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     }
 
     // Data Provider for testGetContent_warnings
-	public function provider_testGetContent_warnings()
+	public static function provider_testGetContent_warnings()
     {
         return array(
             array(array("header.User-Agent" => "header-iPhone", "cookie.User-Agent" => "cookie-iPhone"), "header-iPhone"),
@@ -233,7 +233,7 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     }
 
     // Data Provider for testGetContent_case_insensitive
-	public function provider_testGetContent_case_insensitive()
+	public static function provider_testGetContent_case_insensitive()
     {
         return array(
             array(array("query.User-Agent" => "iPhone1", "Query.user-agent" => "iPhone2"), "iPhone2"),
