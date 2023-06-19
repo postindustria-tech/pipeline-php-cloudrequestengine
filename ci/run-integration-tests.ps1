@@ -5,6 +5,8 @@ param (
     [hashtable]$Keys
 )
 
-./php/run-integration-tests.ps1 -RepoName $RepoName -Keys $Keys
+$env:RESOURCEKEY = $Keys.TestResourceKey
+
+./php/run-integration-tests.ps1 -RepoName $RepoName
 
 exit $LASTEXITCODE

@@ -1,1 +1,1 @@
-Write-Output "Composer packages are git repos, skipping packaging"
+./php/build-package-composer.ps1
