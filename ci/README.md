@@ -1,10 +1,8 @@
 # API Specific CI/CD Approach
-This API is a different from the common-ci approach.
+This API complies with the `common-ci` approach.
 
-Build and Test stage takes `buildType` parameter that can have two values either `Development` or `Production`.
-
-`Development:` Build and test stage will use submodule references for dependencies where the dependency is relative to the local file system, so git references need to be updated to refer to the updated dependencies.
-`Production:` Build and test stage will use the publically released packages so in this case composer.json will need to be updated
-to get the updated packages.
-
-By default build-and-test.yml uses the submodules reference and tag-repository.yml uses the public packages.
+The following secrets are required:
+* `ACCESS_TOKEN` - GitHub [access token](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens#about-personal-access-tokens) for cloning repos, creating PRs, etc.
+    * Example: `github_pat_l0ng_r4nd0m_s7r1ng`
+* `SUPER_RESOURCE_KEY` - [resource key](https://51degrees.com/documentation/4.4/_info__resource_keys.html) for integration tests
+    * Example: `R4nd0m-S7r1ng`
