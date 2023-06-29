@@ -6,17 +6,17 @@ on:
       dryrun:
         default: 'true'
         description: Dry Run
-    # schedule:
-    #   - cron: '0 1 * * *'
+  schedule:
+    - cron: '0 1 * * *'
 
 jobs:
   Nightly_Publish_Main:
-    uses: postindustria-tech/common-ci/.github/workflows/nightly-publish-main.yml@main
+    uses: 51Degrees/common-ci/.github/workflows/nightly-publish-main.yml@main
     with:
       repo-name: ${{ github.event.repository.name }}
       org-name: ${{ github.event.repository.owner.login }}
-      dryrun: ${{ inputs.dryrun }}
+      dryrun: ${{ inputs.dryrun || false }}
       build-platform: ubuntu-latest
     secrets:
-      token: ${{ secrets.GITHUB_TOKEN }}
+      token: ${{ secrets.ACCESS_TOKEN }}
       asset-keys: '{"TestResourceKey": "${{ secrets.SUPER_RESOURCE_KEY }}"}'
