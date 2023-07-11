@@ -44,8 +44,8 @@ class CloudRequestTests extends TestCase
 
         if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
             $this->fail("You need to create a resource key at " .
-            "https://configure.51degrees.com and export it " .
-            "before running tests");
+            "https://configure.51degrees.com and set the RESOURCEKEY" .
+            "environment variable to its value before running tests");
         }
 
         $cloud = new CloudRequestEngine($params);
