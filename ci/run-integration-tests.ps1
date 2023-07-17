@@ -5,6 +5,11 @@ param (
     [hashtable]$Keys
 )
 
+if (!$Keys.TestResourceKey) {
+    Write-Output "::warning file=$($MyInvocation.ScriptName),line=$($MyInvocation.ScriptLineNumber),title=No Resource Key::No resource key was provided, so integration tests will not run."
+    return
+}
+
 $env:RESOURCEKEY = $Keys.TestResourceKey
 
 ./php/run-integration-tests.ps1 -RepoName $RepoName
