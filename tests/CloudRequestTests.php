@@ -36,7 +36,7 @@ use fiftyone\pipeline\core\PipelineBuilder;
 
 use PHPUnit\Framework\TestCase;
 
-class CloudRequestEngineTests extends TestCase
+class CloudRequestTests extends TestCase
 {
     public function testCloudRequestEngine()
     {
@@ -44,9 +44,8 @@ class CloudRequestEngineTests extends TestCase
 
         if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
             $this->fail("You need to create a resource key at " .
-            "https://configure.51degrees.com and paste it into the " .
-            "phpunit.xml config file, " .
-            "replacing !!YOUR_RESOURCE_KEY!!.");
+            "https://configure.51degrees.com and set the RESOURCEKEY" .
+            "environment variable to its value before running tests");
         }
 
         $cloud = new CloudRequestEngine($params);
