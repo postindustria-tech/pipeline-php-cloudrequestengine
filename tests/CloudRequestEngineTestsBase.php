@@ -23,13 +23,8 @@
 
 namespace fiftyone\pipeline\cloudrequestengine\tests;
 
-require(__DIR__ . "/../vendor/autoload.php");
-
-use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
-use fiftyone\pipeline\core\PipelineBuilder;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
-
 use PHPUnit\Framework\TestCase;
 
 class CloudRequestEngineTestsBase extends TestCase {

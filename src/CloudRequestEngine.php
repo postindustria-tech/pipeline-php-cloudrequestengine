@@ -25,8 +25,6 @@
 
 namespace fiftyone\pipeline\cloudrequestengine;
 
-require(__DIR__ . "/Constants.php");
-
 use fiftyone\pipeline\core\BasicListEvidenceKeyFilter;
 use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\Engine;
@@ -150,7 +148,7 @@ class CloudRequestEngine extends Engine
 
         $properties = \json_decode($properties, true);
         
-        $properties = $this->LowerCaseArrayKeys($properties);
+        $properties = $this->lowerCaseArrayKeys($properties);
 
         $flowElementProperties = array();
 
