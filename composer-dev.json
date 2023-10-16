@@ -27,6 +27,11 @@
             "fiftyone\\pipeline\\cloudrequestengine\\": "src/"
         }
     },
+    "autoload-dev": {
+        "psr-4": {
+            "fiftyone\\pipeline\\cloudrequestengine\\tests\\": "tests/"
+        }
+    },
     "repositories": [
         {
             "type": "path",
