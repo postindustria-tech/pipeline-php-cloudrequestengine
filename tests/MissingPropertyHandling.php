@@ -23,15 +23,11 @@
 
 namespace fiftyone\pipeline\cloudrequestengine\tests;
 
-require(__DIR__ . "/../vendor/autoload.php");
-
-use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudEngine;
-use fiftyone\pipeline\engines\AspectDataDictionary;
-use fiftyone\pipeline\core\FlowData;
+use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\core\PipelineBuilder;
+use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\MissingPropertyMessages;
-
 use PHPUnit\Framework\TestCase;
 
 class MissingPropertyHandling extends TestCase {

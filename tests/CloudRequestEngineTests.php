@@ -23,15 +23,9 @@
 
 namespace fiftyone\pipeline\cloudrequestengine\tests;
 
-require(__DIR__ . "/../vendor/autoload.php");
-
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\core\PipelineBuilder;
-use fiftyone\pipeline\cloudrequestengine\HttpClient;
 use fiftyone\pipeline\cloudrequestengine\Constants;
-use fiftyone\pipeline\cloudrequestengine\tests\CloudRequestEngineTestsBase;
-
-use PHPUnit\Framework\TestCase;
 
 class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     const testEndPoint="http://testEndPoint/";
@@ -271,4 +265,3 @@ class CloudRequestEngineTests extends CloudRequestEngineTestsBase {
     }
 
 }
-
