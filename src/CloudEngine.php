@@ -37,12 +37,7 @@ use fiftyone\pipeline\core\AspectPropertyValue;
 class CloudEngine extends CloudEngineBase
 {
     public $dataKey = "CloudEngineBase"; // This should be overriden
-    public $baseURL;
-    public $cloudRequestOrigin;
-    public $flowElementProperties = [];
-    public $resourceKey;
-    private $httpClient;
-    private $evidenceKeys;
+    public $aspectProperties;
 
     /**
      * Callback called when an engine is added to a pipeline

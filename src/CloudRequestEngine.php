@@ -37,11 +37,10 @@ class CloudRequestEngine extends Engine
 
     // Default base url
     public $baseURL;
-
     public $cloudRequestOrigin;
-
     public $flowElementProperties = array();
-    
+    public $resourceKey;
+    private $evidenceKeys;
     private $httpClient;
 
     /**
