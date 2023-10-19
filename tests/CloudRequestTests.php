@@ -21,15 +21,10 @@
  * such notice(s) shall fulfill the requirements of that article.
  * ********************************************************************* */
 
-require(__DIR__ . "/../vendor/autoload.php");
+namespace fiftyone\pipeline\cloudrequestengine\tests;
 
-require(__DIR__ . "/../CloudRequestEngine.php");
-require(__DIR__ . "/../CloudEngine.php");
-require(__DIR__ . "/../CloudRequestException.php");
-require(__DIR__ . "/../HttpClient.php");
-
-use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudEngine;
+use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
 use fiftyone\pipeline\core\PipelineBuilder;

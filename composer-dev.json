@@ -23,13 +23,14 @@
     "license": "EUPL-1.2", 
     "type": "library",
     "autoload": {
-        "classmap": [
-            "CloudRequestEngine.php",
-            "CloudRequestException.php",
-            "CloudEngine.php",
-            "Constants.php",
-            "HttpClient.php"
-        ]
+        "psr-4": {
+            "fiftyone\\pipeline\\cloudrequestengine\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "fiftyone\\pipeline\\cloudrequestengine\\tests\\": "tests/"
+        }
     },
     "repositories": [
         {
