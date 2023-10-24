@@ -29,6 +29,9 @@ namespace fiftyone\pipeline\cloudrequestengine;
  */
 class CloudRequestException extends \Exception
 {
+    public $httpStatusCode;
+    public $responseHeaders;
+
     /**
      * Constructor for CloudRequestException
      * @param string Exception message
