@@ -5,7 +5,7 @@ param (
 
 # This script only runs in nightly-pr-to-main workdflow, where we should use
 # development versions of dependencies
-$env:COMPOSER = "composer-dev.json"
+$env:COMPOSER = "composer.json"
 
 ./php/build-project.ps1 -RepoName $RepoName
 
