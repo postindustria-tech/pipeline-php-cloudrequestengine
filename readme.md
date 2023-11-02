@@ -14,7 +14,7 @@ The Pipeline is a generic micro-services aggregation solution with the ability t
 To run the tests in this repository, make sure PHPUnit is installed then, in the root of this repo, call:
 
 ```
-phpunit --log-junit test-results.xml
+phpunit --fail-on-warning --display-warnings --log-junit test-results.xml
 ```
 
 
