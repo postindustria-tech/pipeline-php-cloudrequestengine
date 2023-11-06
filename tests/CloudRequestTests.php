@@ -29,9 +29,7 @@ use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
 use fiftyone\pipeline\cloudrequestengine\HttpClient;
 use fiftyone\pipeline\core\PipelineBuilder;
 
-use PHPUnit\Framework\TestCase;
-
-class CloudRequestTests extends TestCase
+class CloudRequestTests extends CloudRequestEngineTestsBase
 {
     public function testCloudRequestEngine()
     {
@@ -195,4 +193,78 @@ class CloudRequestTests extends TestCase
         }
     } 
 
+    public function testPipelineSuppressesExceptionsWhenCloudServiceIsDown()
+    {
+        $params = array(
+            "resourceKey" => $_ENV["RESOURCEKEY"],
+            "httpClient" => $this->mockHttp()
+        );
+
+        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
+            $this->fail("You need to create a resource key at " .
+                "https://configure.51degrees.com and set the RESOURCEKEY" .
+                "environment variable to its value before running tests");
+        }
+
+        $cloud = new CloudRequestEngine($params);
+
+        $engine = new CloudEngine();
+
+        $engine->dataKey = "device";
+
+        $cloud->setRestrictedProperties(array("cloud"));
+
+        $pipeline = new PipelineBuilder();
+
+        $pipeline = $pipeline->add($cloud)->add($engine)->build();
+        $pipeline->suppressProcessExceptions = true;
+
+        $fd = $pipeline->createFlowData();
+
+        $fd->evidence->set("header.user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+
+        $result = $fd->process();
+
+        try {
+            $result->device;
+        } catch (\Exception $exception) {
+            // silently discard exceptions not being tested here
+        }
+
+        $this->assertArrayHasKey('cloud', $result->errors);
+        $this->assertInstanceOf(CloudRequestException::class, $result->errors['cloud']);
+    }
+
+    public function testPipelineDoesNotSuppressExceptionsWhenCloudServiceIsDown()
+    {
+        $params = array(
+            "resourceKey" => $_ENV["RESOURCEKEY"],
+            "httpClient" => $this->mockHttp()
+        );
+
+        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
+            $this->fail("You need to create a resource key at " .
+                "https://configure.51degrees.com and set the RESOURCEKEY" .
+                "environment variable to its value before running tests");
+        }
+
+        $cloud = new CloudRequestEngine($params);
+
+        $engine = new CloudEngine();
+
+        $engine->dataKey = "device";
+
+        $cloud->setRestrictedProperties(array("cloud"));
+
+        $pipeline = new PipelineBuilder();
+
+        $pipeline = $pipeline->add($cloud)->add($engine)->build();
+
+        $fd = $pipeline->createFlowData();
+
+        $fd->evidence->set("header.user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+
+        $this->expectException(CloudRequestException::class);
+        $result = $fd->process();
+    }
 }
