@@ -52,10 +52,10 @@ class CloudEngine extends CloudEngineBase
             throw new \Exception("CloudRequestEngine needs to be placed before cloud elements in Pipeline");
         };
 
-        $this->properties = $pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey];
     }
     public function processInternal($flowData)
     {
+        $this->properties = $flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey];
 
         $cloudData = $flowData->get("cloud")->get("cloud");
 
