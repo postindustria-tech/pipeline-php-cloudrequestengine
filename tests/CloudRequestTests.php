@@ -183,7 +183,9 @@ class CloudRequestTests extends TestCase
         try {
             $cloud = new CloudRequestEngine($params);
             $cloud->setRestrictedProperties(array("cloud"));
-            $pipeline = $pipeline->add($cloud)->add($engine)->build();
+            $pipeline = $pipeline->add($cloud)->build();
+            $flowData = $pipeline->createFlowData();
+            $flowData->process();
             $this->fail("Expected exception did not occur");
         }
         catch(CloudRequestException $e) {
