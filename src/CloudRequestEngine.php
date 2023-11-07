@@ -40,7 +40,7 @@ class CloudRequestEngine extends Engine
     public $cloudRequestOrigin;
     public $flowElementProperties = array();
     public $resourceKey;
-    private $evidenceKeys;
+    private $evidenceKeys = array();
     private $httpClient;
 
     /**
@@ -89,11 +89,6 @@ class CloudRequestEngine extends Engine
         if (isset($settings["cloudRequestOrigin"])) {
             $this->cloudRequestOrigin = $settings["cloudRequestOrigin"];
         }
-
-        $this->flowElementProperties = $this->getEngineProperties();
-
-        $this->evidenceKeys = $this->getEvidenceKeys();
-
 
         parent::__construct($settings);
     }
@@ -186,6 +181,14 @@ class CloudRequestEngine extends Engine
      **/
     public function processInternal($flowData)
     {
+        if (count($this->flowElementProperties) === 0) {
+            $this->flowElementProperties = $this->getEngineProperties();
+        }
+
+        if (count($this->evidenceKeys) === 0) {
+            $this->evidenceKeys = $this->getEvidenceKeys();
+        }
+        
         $url = $this->baseURL . $this->resourceKey . ".json?";
 
         $content = http_build_query($this->getContent($flowData));

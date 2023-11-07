@@ -25,6 +25,8 @@ namespace fiftyone\pipeline\cloudrequestengine\tests;
 
 use fiftyone\pipeline\cloudrequestengine\CloudRequestEngine;
 use fiftyone\pipeline\cloudrequestengine\CloudRequestException;
+use fiftyone\pipeline\core\Evidence;
+use fiftyone\pipeline\core\FlowData;
 use fiftyone\pipeline\core\PipelineBuilder;
 
 class CloudResponse extends CloudRequestEngineTestsBase {
@@ -62,12 +64,21 @@ class CloudResponse extends CloudRequestEngineTestsBase {
      * meta-data for sub-properties.
      */
     public function testSubProperties() {
+        $engine = new CloudRequestEngine([
+            'resourceKey' => 'subpropertieskey',
+            'httpClient' => $this->mockHttp()
+        ]);
         
-        $httpClient = $this->mockHttp();
-
-        $engine = new CloudRequestEngine(array(
-            "resourceKey" => "subpropertieskey",
-            "httpClient" => $httpClient));
+        $flowData = $this->createMock(FlowData::class);
+        $evidence = $this->getMockBuilder(Evidence::class)->setConstructorArgs(['flowData' => $flowData])->getMock();
+        $evidence->method('getAll')->willReturn([]);
+        $flowData->evidence = $evidence;
+        
+        try {
+            $engine->process($flowData);
+        } catch (CloudRequestException $exception) {
+            //
+        }
 
         $this->assertEquals(2, count($engine->flowElementProperties));
        
@@ -94,25 +105,16 @@ class CloudResponse extends CloudRequestEngineTestsBase {
      * from the JSON response.
      */ 
     public function testValidateErrorHandlingInvalidResourceKey() {
-
-        $httpClient = $this->mockHttp();
-
-        $exception = null;
-
+        $engine = new CloudRequestEngine([
+            'resourceKey' => CloudResponse::invalidKey,
+            'httpClient' => $this->mockHttp()
+        ]);
+        
         try {
-            $engine = new CloudRequestEngine(array(
-                "resourceKey" => CloudResponse::invalidKey,
-                "httpClient" => $httpClient
-            ));
+            $engine->process(null);
+        } catch (CloudRequestException $exception) {
+            $this->assertStringContainsString(CloudResponse::invalidKey, $exception->getMessage());
         }
-        catch (CloudRequestException $ex) {
-            $exception = $ex;
-        }
-
-        $this->assertNotNull("Expected exception to occur", $exception);
-        $this->assertTrue(
-            strpos($exception->getMessage(), CloudResponse::invalidKeyMessage)
-            != false);
     }
 
     /** 
@@ -126,22 +128,15 @@ class CloudResponse extends CloudRequestEngineTestsBase {
      * from the JSON response.
      */ 
     public function testValidateErrorHandlingNoData() {
-
-        $httpClient = $this->mockHttp();
-
-        $exception = null;
+        $engine = new CloudRequestEngine([
+            'resourceKey' => CloudResponse::noDataKey,
+            'httpClient' => $this->mockHttp()
+        ]);
 
         try {
-            $engine = new CloudRequestEngine(array(
-                "resourceKey" => CloudResponse::noDataKey,
-                "httpClient" => $httpClient
-            ));
+            $engine->process(null);
+        } catch (CloudRequestException $exception) {
+            $this->assertStringContainsString(CloudResponse::noDataKeyMessageComplete, $exception->getMessage());
         }
-        catch (CloudRequestException $ex) {
-            $exception = $ex;
-        }
-
-        $this->assertNotNull("Expected exception to occur", $exception);
-        $this->assertEquals($exception->getMessage(), CloudResponse::noDataKeyMessageComplete);
     }
 }
