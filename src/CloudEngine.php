@@ -41,8 +41,6 @@ class CloudEngine extends CloudEngineBase
 
     /**
      * Callback called when an engine is added to a pipeline
-     * In this case sets up the properties list for the element from
-     * data in the CloudRequestEngine
      * @param Pipeline
      * @return void
     */
@@ -50,12 +48,15 @@ class CloudEngine extends CloudEngineBase
     {
         if (!isset($pipeline->flowElementsList["cloud"])) {
             throw new \Exception("CloudRequestEngine needs to be placed before cloud elements in Pipeline");
-        };
-
+        }
     }
+    
     public function processInternal($flowData)
     {
-        $this->properties = $flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey];
+        if (isset($flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey])) {
+            // set up properties list for the element from data in the CloudRequestEngine
+            $this->properties = $flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey];
+        }
 
         $cloudData = $flowData->get("cloud")->get("cloud");
 
