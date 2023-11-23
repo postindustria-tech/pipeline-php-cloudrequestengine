@@ -23,58 +23,61 @@
 
 namespace fiftyone\pipeline\cloudrequestengine;
 
+use fiftyone\pipeline\core\AspectPropertyValue;
 use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\CloudEngineBase;
-use fiftyone\pipeline\core\AspectPropertyValue;
 
 /**
  * This is a template for all 51Degrees cloud engines.
  * It requires the 51Degrees cloudRequestEngine to be placed in a
  *  pipeline before it. It takes that raw JSON response and
  * parses it to extract the device part.
- * It also uses this data to generate a list of properties and an evidence key filter
- **/
+ * It also uses this data to generate a list of properties and an evidence key filter.
+ */
 class CloudEngine extends CloudEngineBase
 {
-    public $dataKey = "CloudEngineBase"; // This should be overriden
+    public $dataKey = 'CloudEngineBase'; // This should be overridden
     public $aspectProperties;
 
     /**
-     * Callback called when an engine is added to a pipeline
-     * @param Pipeline
-     * @return void
-    */
+     * Callback called when an engine is added to a pipeline.
+     *
+     * @param \fiftyone\pipeline\core\Pipeline $pipeline
+     * @throws \Exception
+     */
     public function onRegistration($pipeline)
     {
-        if (!isset($pipeline->flowElementsList["cloud"])) {
-            throw new \Exception("CloudRequestEngine needs to be placed before cloud elements in Pipeline");
+        if (isset($pipeline->flowElementsList['cloud'])) {
+            return;
         }
+
+        throw new \Exception(Constants::CLOUDREQUESTENGINE_EXCEPTION_MESSAGE);
     }
-    
+
     public function processInternal($flowData)
     {
-        if (isset($flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey])) {
+        if (isset($flowData->pipeline->flowElementsList['cloud']->flowElementProperties[$this->dataKey])) {
             // set up properties list for the element from data in the CloudRequestEngine
-            $this->properties = $flowData->pipeline->flowElementsList["cloud"]->flowElementProperties[$this->dataKey];
+            $this->properties = $flowData->pipeline->flowElementsList['cloud']->flowElementProperties[$this->dataKey];
         }
 
-        $cloudData = $flowData->get("cloud")->get("cloud");
+        $cloudData = $flowData->get('cloud')->get('cloud');
 
         if ($cloudData) {
-            $cloudData = \json_decode($cloudData, true);
+            $cloudData = json_decode($cloudData, true);
 
             $result = [];
 
             foreach ($cloudData[$this->dataKey] as $key => $value) {
-                if (isset($cloudData[$this->dataKey][$key . "nullreason"])) {
-                    $result[$key] = new AspectPropertyValue($cloudData[$this->dataKey][$key . "nullreason"]);
+                if (isset($cloudData[$this->dataKey][$key . 'nullreason'])) {
+                    $result[$key] = new AspectPropertyValue($cloudData[$this->dataKey][$key . 'nullreason']);
                 } else {
                     $result[$key] = new AspectPropertyValue(null, $value);
                 }
-            };
+            }
 
             $data = new AspectDataDictionary($this, $result);
-            
+
             $flowData->setElementData($data);
         }
     }

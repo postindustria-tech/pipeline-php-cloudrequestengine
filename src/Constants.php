@@ -23,69 +23,73 @@
 
 namespace fiftyone\pipeline\cloudrequestengine;
 
-class Constants {
+class Constants
+{
     // Environment variable to set cloud endpoint
-    const FOD_CLOUD_API_URL = "FOD_CLOUD_API_URL";
+    public const FOD_CLOUD_API_URL = 'FOD_CLOUD_API_URL';
     // Default base url
-    const BASE_URL_DEFAULT = "https://cloud.51degrees.com/api/v4/";
+    public const BASE_URL_DEFAULT = 'https://cloud.51degrees.com/api/v4/';
 
     // No Data in response message to be set in exception when cloud neither
     // return any data nor any error messages
-    const MESSAGE_NO_DATA_IN_RESPONSE = "No data in response from cloud service at %s";
-	
+    public const MESSAGE_NO_DATA_IN_RESPONSE = 'No data in response from cloud service at %s';
+
     // Message when multiple errors are returned from cloud service
-    const EXCEPTION_CLOUD_ERRORS_MULTIPLE = 
-            "Multiple errors returned from 51Degrees cloud service. See inner " .
-            "exceptions for details.";
+    public const EXCEPTION_CLOUD_ERRORS_MULTIPLE =
+            'Multiple errors returned from 51Degrees cloud service. See inner ' .
+            'exceptions for details.';
 
     // Message when single error is returned from cloud service
-    const EXCEPTION_CLOUD_ERROR = 
+    public const EXCEPTION_CLOUD_ERROR =
             "Error returned from 51Degrees cloud service: '%s'";
 
     // Error message when non-success status is returned.
-    const MESSAGE_ERROR_CODE_RETURNED = "Cloud service at '%s' returned status code '%s' with content %s";
+    public const MESSAGE_ERROR_CODE_RETURNED = "Cloud service at '%s' returned status code '%s' with content %s";
 
     // Evidence key seperator
-    const EVIDENCE_SEPERATOR = ".";
+    public const EVIDENCE_SEPERATOR = '.';
 
-    // Used to prefix evidence that is obtained from HTTP headers 
-    const EVIDENCE_HTTPHEADER_PREFIX = "header";
+    // Used to prefix evidence that is obtained from HTTP headers
+    public const EVIDENCE_HTTPHEADER_PREFIX = 'header';
 
-    // Used to prefix evidence that is obtained from HTTP bookies 
-    const EVIDENCE_COOKIE_PREFIX = "cookie";
+    // Used to prefix evidence that is obtained from HTTP bookies
+    public const EVIDENCE_COOKIE_PREFIX = 'cookie';
 
     // Used to prefix evidence that is obtained from an HTTP request's
-    // query string or is passed into the pipeline for off-line 
+    // query string or is passed into the pipeline for off-line
     // processing.
-    const EVIDENCE_QUERY_PREFIX = "query";
+    public const EVIDENCE_QUERY_PREFIX = 'query';
 
     // other evidence constant
-    const EVIDENCE_OTHER = "other";
-    
+    public const EVIDENCE_OTHER = 'other';
+
     // warning message to be shown for conflicted evidences
-    const WARNING_MESSAGE = "'%s=>%s' evidence conflicts with ";
+    public const WARNING_MESSAGE = "'%s=>%s' evidence conflicts with ";
 
     // The suffix that is used to identify a TAC in evidence.
     // https://en.wikipedia.org/wiki/Type_Allocation_Code
-    const EVIDENCE_TAC_SUFFIX = "tac";
+    public const EVIDENCE_TAC_SUFFIX = 'tac';
 
     // The complete key for supplying a TAC as evidence.
-    const EVIDENCE_QUERY_TAC_KEY =
+    public const EVIDENCE_QUERY_TAC_KEY =
         Constants::EVIDENCE_QUERY_PREFIX .
         Constants::EVIDENCE_SEPERATOR .
         Constants::EVIDENCE_TAC_SUFFIX;
 
     // The suffix that is used to identify a native model name in evidence.
-    // This is the text returned by 
-    // https://developer.android.com/reference/android/os/Build#MODEL 
+    // This is the text returned by
+    // https://developer.android.com/reference/android/os/Build#MODEL
     // for Android devices and by
     // https://gist.github.com/soapyigu/c99e1f45553070726f14c1bb0a54053b#file-machinename-swift
     // for iOS devices.
-    const EVIDENCE_NATIVE_MODEL_SUFFIX = "nativemodel";
+    public const EVIDENCE_NATIVE_MODEL_SUFFIX = 'nativemodel';
 
     // The complete key for supplying a native model name as evidence.
-    const EVIDENCE_QUERY_NATIVE_MODEL_KEY =
+    public const EVIDENCE_QUERY_NATIVE_MODEL_KEY =
         Constants::EVIDENCE_QUERY_PREFIX .
         Constants::EVIDENCE_SEPERATOR .
         Constants::EVIDENCE_NATIVE_MODEL_SUFFIX;
+
+    public const CLOUDREQUESTENGINE_EXCEPTION_MESSAGE =
+        'CloudRequestEngine needs to be placed before cloud elements in Pipeline';
 }
