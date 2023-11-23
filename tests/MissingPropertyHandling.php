@@ -30,131 +30,134 @@ use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\MissingPropertyMessages;
 use PHPUnit\Framework\TestCase;
 
-class MissingPropertyHandling extends TestCase {
-    
+class MissingPropertyHandling extends TestCase
+{
+    public const expectedNullReason = 'this is the null reason';
+
+    public const nullValueJson =
+        "{\n" .
+        "  \"testElement\": {\n" .
+        "    \"property1\": \"a value\",\n" .
+        "    \"property2\": null,\n" .
+        '    "property2nullreason": "' . MissingPropertyHandling::expectedNullReason . "\"\n" .
+        "  },\n" .
+        "  \"javascriptProperties\": []\n" .
+        '}';
+
+    private $properties =
+        [
+            'property1' => [
+                'name' => 'property1',
+                'type' => 'string',
+                'available' => true],
+            'property2' => [
+                'name' => 'property2',
+                'type' => 'string',
+                'available' => true
+            ]
+        ];
+    private $cloudProperties =
+        [
+            'cloud' => [
+                'name' => 'cloud',
+                'type' => 'string',
+                'available' => true
+            ]
+        ];
+
     /**
      * Test that a cloud response which has a null value for a property is
      * mapped into an AspectPropertyValue with the 'no value reason' set from
      * the 'nullvaluereason' in the cloud response.
      */
-    public function testPropertyInResourceNullValue() {
+    public function testPropertyInResourceNullValue()
+    {
         $engine = new CloudEngine();
-        $engine->dataKey = "testElement";
+        $engine->dataKey = 'testElement';
 
         $cloudRequestEngine = $this->createMock(CloudRequestEngine::class);
-        $cloudRequestEngine->method("getProperties")
+        $cloudRequestEngine->method('getProperties')
             ->willReturn($this->cloudProperties);
-        $cloudRequestEngine->flowElementProperties = array(
-            "testElement" => $this->properties
-        );
-        $cloudRequestEngine->dataKey = "cloud";
-        
+        $cloudRequestEngine->flowElementProperties = [
+            'testElement' => $this->properties
+        ];
+        $cloudRequestEngine->dataKey = 'cloud';
+
         $builder = new PipelineBuilder();
 
         $pipeline = $builder->add($cloudRequestEngine)->add($engine)->build();
 
         $flowData = $pipeline->createFlowData();
-        
+
         $this->addResponse($cloudRequestEngine, $flowData, MissingPropertyHandling::nullValueJson);
-        
+
         $engine->aspectProperties = $this->properties;
-        $engine->dataKey = "testElement";
+        $engine->dataKey = 'testElement';
         $engine->processInternal($flowData);
 
+        $data = $flowData->get('testElement');
 
-        $data = $flowData->get("testElement");
-        
-        $property2 = $data->get("property2");
+        $property2 = $data->get('property2');
         $this->assertTrue($property2 != null);
         $this->assertFalse($property2->hasValue);
         $this->assertEquals(
             MissingPropertyHandling::expectedNullReason,
-            $property2->noValueMessage);
+            $property2->noValueMessage
+        );
     }
 
     /**
      * Test that a cloud response which has no value for a property throws a
      * PropertyMissingException.
      */
-    public function testPropertyNotInResource() {
+    public function testPropertyNotInResource()
+    {
         $engine = new CloudEngine();
-        $engine->dataKey = "testElement";
+        $engine->dataKey = 'testElement';
 
         $cloudRequestEngine = $this->createMock(CloudRequestEngine::class);
-        $cloudRequestEngine->method("getProperties")
+        $cloudRequestEngine->method('getProperties')
             ->willReturn($this->cloudProperties);
-        $cloudRequestEngine->flowElementProperties = array(
-            "testElement" => $this->properties
-        );
-        $cloudRequestEngine->dataKey = "cloud";
-        
+        $cloudRequestEngine->flowElementProperties = [
+            'testElement' => $this->properties
+        ];
+        $cloudRequestEngine->dataKey = 'cloud';
+
         $builder = new PipelineBuilder();
 
         $pipeline = $builder->add($cloudRequestEngine)->add($engine)->build();
 
         $flowData = $pipeline->createFlowData();
-        
+
         $this->addResponse($cloudRequestEngine, $flowData, MissingPropertyHandling::nullValueJson);
-        
+
         $engine->aspectProperties = $this->properties;
-        $engine->dataKey = "testElement";
+        $engine->dataKey = 'testElement';
         $engine->processInternal($flowData);
 
+        $data = $flowData->get('testElement');
 
-        $data = $flowData->get("testElement");
-        
         try {
-            $property = $data->get("property3");
+            $property = $data->get('property3');
             $this->fail();
         } catch (\Exception $ex) {
             $this->assertEquals(
                 sprintf(
                     MissingPropertyMessages::PREFIX .
                     MissingPropertyMessages::PROPERTY_NOT_IN_CLOUD_RESOURCE,
-                        "property3",
-                        "testElement",
-                        "testElement",
-                        "property1, property2"),
-                $ex->getMessage());
-
+                    'property3',
+                    'testElement',
+                    'testElement',
+                    'property1, property2'
+                ),
+                $ex->getMessage()
+            );
         }
     }
 
-    const expectedNullReason = "this is the null reason";
-
-    const nullValueJson =
-        "{\n" .
-        "  \"testElement\": {\n" .
-        "    \"property1\": \"a value\",\n" .
-        "    \"property2\": null,\n" .
-        "    \"property2nullreason\": \"" . MissingPropertyHandling::expectedNullReason . "\"\n" .
-        "  },\n" .
-        "  \"javascriptProperties\": []\n" .
-        "}";
-
-    private $properties =
-        array(
-            "property1" => array(
-                "name" => "property1",
-                "type" => "string",
-                "available" => true),
-            "property2" => array(
-                "name" => "property2",
-                "type" => "string",
-                "available" => true
-            )
-        );
-    private $cloudProperties =
-        array(
-            "cloud" => array(
-                "name" => "cloud",
-                "type" => "string",
-                "available" => true
-            )
-        );
-
-    private function addResponse($cloud, $flowData, $json) {
-        $cloudData = new AspectDataDictionary($cloud, ["cloud" => $json]);
+    private function addResponse($cloud, $flowData, $json)
+    {
+        $cloudData = new AspectDataDictionary($cloud, ['cloud' => $json]);
         $flowData->setElementData($cloudData);
     }
 }

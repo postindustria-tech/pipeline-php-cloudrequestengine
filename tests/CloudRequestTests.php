@@ -33,21 +33,23 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 {
     public function testCloudRequestEngine()
     {
-        $params = array("resourceKey" => $_ENV["RESOURCEKEY"]);
+        $params = ['resourceKey' => $_ENV['RESOURCEKEY']];
 
-        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
-            $this->fail("You need to create a resource key at " .
-            "https://configure.51degrees.com and set the RESOURCEKEY" .
-            "environment variable to its value before running tests");
-        }
+        $this->assertNotSame(
+            '!!YOUR_RESOURCE_KEY!!',
+            $params['resourceKey'],
+            'You need to create a resource key at ' .
+            'https://configure.51degrees.com and set the RESOURCEKEY' .
+            'environment variable to its value before running tests'
+        );
 
         $cloud = new CloudRequestEngine($params);
 
         $engine = new CloudEngine();
 
-        $engine->dataKey = "device";
+        $engine->dataKey = 'device';
 
-        $cloud->setRestrictedProperties(array("cloud"));
+        $cloud->setRestrictedProperties(['cloud']);
 
         $pipeline = new PipelineBuilder();
 
@@ -55,11 +57,11 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $fd = $pipeline->createFlowData();
 
-        $fd->evidence->set("header.user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+        $fd->evidence->set('header.user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0');
 
         $result = $fd->process();
 
-        $this->assertEquals($result->device->ismobile->hasValue, true);
+        $this->assertTrue($result->device->ismobile->hasValue);
     }
 
     /**
@@ -69,24 +71,26 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
      *  so any problems with that service could affect the result
      *  of this test.
      */
-    public function testCloudPostRequestWithSequenceEvidence() {
+    public function testCloudPostRequestWithSequenceEvidence()
+    {
+        $params = ['resourceKey' => $_ENV['RESOURCEKEY']];
 
-        $params = array("resourceKey" => $_ENV["RESOURCEKEY"]);
-
-        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
-            $this->fail("You need to create a resource key at " .
-            "https://configure.51degrees.com and paste it into the " .
-            "phpunit.xml config file, " .
-            "replacing !!YOUR_RESOURCE_KEY!!.");
-        }
+        $this->assertNotSame(
+            '!!YOUR_RESOURCE_KEY!!',
+            $params['resourceKey'],
+            'You need to create a resource key at ' .
+            'https://configure.51degrees.com and paste it into the ' .
+            'phpunit.xml config file, ' .
+            'replacing !!YOUR_RESOURCE_KEY!!.'
+        );
 
         $cloud = new CloudRequestEngine($params);
 
         $engine = new CloudEngine();
 
-        $engine->dataKey = "device";
+        $engine->dataKey = 'device';
 
-        $cloud->setRestrictedProperties(array("cloud"));
+        $cloud->setRestrictedProperties(['cloud']);
 
         $pipeline = new PipelineBuilder();
 
@@ -94,16 +98,15 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $fd = $pipeline->createFlowData();
 
-        $fd->evidence->set("query.session-id", "8b5461ac-68fc-4b18-a660-7bd463b2537a");
-        $fd->evidence->set("query.sequence", 1);
+        $fd->evidence->set('query.session-id', '8b5461ac-68fc-4b18-a660-7bd463b2537a');
+        $fd->evidence->set('query.sequence', 1);
 
         try {
             $result = $fd->process();
-            $this->assertTrue(empty($result->errors));
+            $this->assertEmpty($result->errors);
+        } catch (\Exception $e) {
+            $this->fail('FlowData returns errors for POST request.');
         }
-        catch (\Exception $e) {
-            $this->fail("FlowData returns errors for POST request.");
-        }   
     }
 
     /**
@@ -113,26 +116,31 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
      *  so any problems with that service could affect the result
      *  of this test.
      */
-    public function testCloudGetRequestWithSequenceEvidence() {
-
+    public function testCloudGetRequestWithSequenceEvidence()
+    {
         $httpClient = new HttpClient();
 
-        $params = array("resourceKey" => $_ENV["RESOURCEKEY"], "httpClient" => $httpClient);
+        $params = [
+            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'httpClient' => $httpClient
+        ];
 
-        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
-            $this->fail("You need to create a resource key at " .
-            "https://configure.51degrees.com and paste it into the " .
-            "phpunit.xml config file, " .
-            "replacing !!YOUR_RESOURCE_KEY!!.");
-        }
+        $this->assertNotSame(
+            '!!YOUR_RESOURCE_KEY!!',
+            $params['resourceKey'],
+            'You need to create a resource key at ' .
+            'https://configure.51degrees.com and paste it into the ' .
+            'phpunit.xml config file, ' .
+            'replacing !!YOUR_RESOURCE_KEY!!.'
+        );
 
         $cloud = new CloudRequestEngine($params);
 
         $engine = new CloudEngine();
 
-        $engine->dataKey = "device";
+        $engine->dataKey = 'device';
 
-        $cloud->setRestrictedProperties(array("cloud"));
+        $cloud->setRestrictedProperties(['cloud']);
 
         $pipeline = new PipelineBuilder();
 
@@ -140,21 +148,20 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $fd = $pipeline->createFlowData();
 
-        $fd->evidence->set("query.session-id", "8b5461ac-68fc-4b18-a660-7bd463b2537a");
-        $fd->evidence->set("query.sequence", 1);
+        $fd->evidence->set('query.session-id', '8b5461ac-68fc-4b18-a660-7bd463b2537a');
+        $fd->evidence->set('query.sequence', 1);
 
-        $result = $fd->process();
+        $fd->process();
 
-        $url = $cloud->baseURL . $cloud->resourceKey . ".json?&";
+        $url = $cloud->baseURL . $cloud->resourceKey . '.json?&';
 
         $evidence = $fd->evidence->getAll();
 
         // Remove prefix from evidence
-
-        $evidenceWithoutPrefix = array();
+        $evidenceWithoutPrefix = [];
 
         foreach ($evidence as $key => $value) {
-            $keySplit = explode(".", $key);
+            $keySplit = explode('.', $key);
 
             if (isset($keySplit[1])) {
                 $evidenceWithoutPrefix[$keySplit[1]] = $value;
@@ -163,56 +170,57 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $url .= http_build_query($evidenceWithoutPrefix);
 
-        $result = $httpClient->makeCloudRequest("GET", $url, null, null);
-        $result = \json_decode($result, true);
-        $this->assertTrue(empty($result["errors"]));
+        $result = $httpClient->makeCloudRequest('GET', $url, null, null);
+        $result = json_decode($result, true);
+        $this->assertArrayNotHasKey('errors', $result);
     }
 
     /**
-     *  Check that errors from the cloud service will cause the        
+     *  Check that errors from the cloud service will cause the
      *  appropriate data to be set in the CloudRequestException.
      */
-    public function testHttpDataSetInException() {
-
-        $params = array("resourceKey" => "resource_key");
+    public function testHttpDataSetInException()
+    {
+        $params = ['resourceKey' => 'resource_key'];
 
         $pipeline = new PipelineBuilder();
 
         try {
             $cloud = new CloudRequestEngine($params);
-            $cloud->setRestrictedProperties(array("cloud"));
+            $cloud->setRestrictedProperties(['cloud']);
             $pipeline = $pipeline->add($cloud)->build();
             $flowData = $pipeline->createFlowData();
             $flowData->process();
-            $this->fail("Expected exception did not occur");
+            $this->fail('Expected exception did not occur');
+        } catch (CloudRequestException $e) {
+            $this->assertGreaterThan(0, $e->httpStatusCode, 'Status code should not be 0');
+            $this->assertNotEmpty($e->responseHeaders, 'Response headers not populated');
+            $this->assertGreaterThan(0, count($e->responseHeaders), 'Response headers not populated');
         }
-        catch(CloudRequestException $e) {
-            $this->assertTrue($e->httpStatusCode > 0, "Status code should not be 0");
-            $this->assertTrue(isset($e->responseHeaders), "Response headers not populated");
-            $this->assertTrue(count($e->responseHeaders) > 0, "Response headers not populated");   
-        }
-    } 
+    }
 
     public function testPipelineSuppressesExceptionsWhenCloudServiceIsDown()
     {
-        $params = array(
-            "resourceKey" => $_ENV["RESOURCEKEY"],
-            "httpClient" => $this->mockHttp()
-        );
+        $params = [
+            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'httpClient' => $this->mockHttp()
+        ];
 
-        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
-            $this->fail("You need to create a resource key at " .
-                "https://configure.51degrees.com and set the RESOURCEKEY" .
-                "environment variable to its value before running tests");
-        }
+        $this->assertNotSame(
+            '!!YOUR_RESOURCE_KEY!!',
+            $params['resourceKey'],
+            'You need to create a resource key at ' .
+            'https://configure.51degrees.com and set the RESOURCEKEY' .
+            'environment variable to its value before running tests'
+        );
 
         $cloud = new CloudRequestEngine($params);
 
         $engine = new CloudEngine();
 
-        $engine->dataKey = "device";
+        $engine->dataKey = 'device';
 
-        $cloud->setRestrictedProperties(array("cloud"));
+        $cloud->setRestrictedProperties(['cloud']);
 
         $pipeline = new PipelineBuilder();
 
@@ -221,7 +229,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $fd = $pipeline->createFlowData();
 
-        $fd->evidence->set("header.user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+        $fd->evidence->set('header.user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0');
 
         $result = $fd->process();
 
@@ -237,24 +245,26 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
     public function testPipelineDoesNotSuppressExceptionsWhenCloudServiceIsDown()
     {
-        $params = array(
-            "resourceKey" => $_ENV["RESOURCEKEY"],
-            "httpClient" => $this->mockHttp()
-        );
+        $params = [
+            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'httpClient' => $this->mockHttp()
+        ];
 
-        if ($params["resourceKey"] === "!!YOUR_RESOURCE_KEY!!") {
-            $this->fail("You need to create a resource key at " .
-                "https://configure.51degrees.com and set the RESOURCEKEY" .
-                "environment variable to its value before running tests");
-        }
+        $this->assertNotSame(
+            '!!YOUR_RESOURCE_KEY!!',
+            $params['resourceKey'],
+            'You need to create a resource key at ' .
+            'https://configure.51degrees.com and set the RESOURCEKEY' .
+            'environment variable to its value before running tests'
+        );
 
         $cloud = new CloudRequestEngine($params);
 
         $engine = new CloudEngine();
 
-        $engine->dataKey = "device";
+        $engine->dataKey = 'device';
 
-        $cloud->setRestrictedProperties(array("cloud"));
+        $cloud->setRestrictedProperties(['cloud']);
 
         $pipeline = new PipelineBuilder();
 
@@ -262,9 +272,9 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $fd = $pipeline->createFlowData();
 
-        $fd->evidence->set("header.user-agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0");
+        $fd->evidence->set('header.user-agent', 'Mozilla/5.0 (Windows NT 10.0; Win64; x64; rv:78.0) Gecko/20100101 Firefox/78.0');
 
         $this->expectException(CloudRequestException::class);
-        $result = $fd->process();
+        $fd->process();
     }
 }

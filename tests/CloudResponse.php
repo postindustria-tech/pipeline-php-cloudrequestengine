@@ -29,25 +29,26 @@ use fiftyone\pipeline\core\Evidence;
 use fiftyone\pipeline\core\FlowData;
 use fiftyone\pipeline\core\PipelineBuilder;
 
-class CloudResponse extends CloudRequestEngineTestsBase {
+class CloudResponse extends CloudRequestEngineTestsBase
+{
     /**
      * Test cloud request engine adds correct information to post request
-     * and returns the response in the ElementData
+     * and returns the response in the ElementData.
      */
-    public function testProcess() {
-
+    public function testProcess()
+    {
         $httpClient = $this->mockHttp();
-        
-        $engine = new CloudRequestEngine(array(
-            "resourceKey" => CloudResponse::resourceKey,
-            "httpClient" => $httpClient));
 
-        $builder= new PipelineBuilder();
+        $engine = new CloudRequestEngine([
+            'resourceKey' => CloudResponse::resourceKey,
+            'httpClient' => $httpClient]);
+
+        $builder = new PipelineBuilder();
         $pipeline = $builder
             ->add($engine)
             ->build();
         $data = $pipeline->createFlowData();
-        $data->evidence->set("query.User-Agent", CloudResponse::userAgent);
+        $data->evidence->set('query.User-Agent', CloudResponse::userAgent);
 
         $data->process();
 
@@ -55,61 +56,61 @@ class CloudResponse extends CloudRequestEngineTestsBase {
         $this->assertEquals(CloudResponse::jsonResponse, $result);
 
         $jsonObj = \json_decode($result, true);
-        $this->assertEquals(1, $jsonObj["device"]["value"]);
+        $this->assertEquals(1, $jsonObj['device']['value']);
     }
-    
+
     /**
      * Verify that the CloudRequestEngine can correctly parse a
      * response from the accessible properties endpoint that contains
      * meta-data for sub-properties.
      */
-    public function testSubProperties() {
+    public function testSubProperties()
+    {
         $engine = new CloudRequestEngine([
             'resourceKey' => 'subpropertieskey',
             'httpClient' => $this->mockHttp()
         ]);
-        
+
         $flowData = $this->createMock(FlowData::class);
         $evidence = $this->getMockBuilder(Evidence::class)->setConstructorArgs(['flowData' => $flowData])->getMock();
         $evidence->method('getAll')->willReturn([]);
         $flowData->evidence = $evidence;
-        
+
         try {
             $engine->process($flowData);
         } catch (CloudRequestException $exception) {
-            //
         }
 
         $this->assertEquals(2, count($engine->flowElementProperties));
-       
-        $deviceProperties = $engine->flowElementProperties["device"];
+
+        $deviceProperties = $engine->flowElementProperties['device'];
         $this->assertEquals(2, count($deviceProperties));
-        $this->assertTrue($this->propertiesContainName($deviceProperties, "IsMobile"));
-        $this->assertTrue($this->propertiesContainName($deviceProperties, "IsTablet"));
-        $devicesProperties = $engine->flowElementProperties["devices"];
+        $this->assertTrue($this->propertiesContainName($deviceProperties, 'IsMobile'));
+        $this->assertTrue($this->propertiesContainName($deviceProperties, 'IsTablet'));
+        $devicesProperties = $engine->flowElementProperties['devices'];
         $this->assertEquals(1, count($devicesProperties));
-        $this->assertTrue(isset($devicesProperties["devices"]));
-        $this->assertTrue($this->propertiesContainName($devicesProperties["devices"]["itemproperties"], "IsMobile"));
-        $this->assertTrue($this->propertiesContainName($devicesProperties["devices"]["itemproperties"], "IsTablet"));
+        $this->assertTrue(isset($devicesProperties['devices']));
+        $this->assertTrue($this->propertiesContainName($devicesProperties['devices']['itemproperties'], 'IsMobile'));
+        $this->assertTrue($this->propertiesContainName($devicesProperties['devices']['itemproperties'], 'IsTablet'));
     }
 
-    
-    /** 
-     * Test cloud request engine handles errors from the cloud service 
+    /**
+     * Test cloud request engine handles errors from the cloud service
      * as expected.
      * An exception should be thrown by the cloud request engine
      * containing the errors from the cloud service
-     * and the pipeline is configured to throw any exceptions up 
+     * and the pipeline is configured to throw any exceptions up
      * the stack.
-     * We also check that the exception message includes the content 
+     * We also check that the exception message includes the content
      * from the JSON response.
-     */ 
-    public function testValidateErrorHandlingInvalidResourceKey() {
+     */
+    public function testValidateErrorHandlingInvalidResourceKey()
+    {
         $engine = new CloudRequestEngine([
             'resourceKey' => CloudResponse::invalidKey,
             'httpClient' => $this->mockHttp()
         ]);
-        
+
         try {
             $engine->process(null);
         } catch (CloudRequestException $exception) {
@@ -117,17 +118,18 @@ class CloudResponse extends CloudRequestEngineTestsBase {
         }
     }
 
-    /** 
+    /**
      * Test cloud request engine handles a lack of data from the
      * cloud service as expected.
      * An exception should be thrown by the cloud request engine
      * containing the errors from the cloud service
-     * and the pipeline is configured to throw any exceptions up 
+     * and the pipeline is configured to throw any exceptions up
      * the stack.
-     * We also check that the exception message includes the content 
+     * We also check that the exception message includes the content
      * from the JSON response.
-     */ 
-    public function testValidateErrorHandlingNoData() {
+     */
+    public function testValidateErrorHandlingNoData()
+    {
         $engine = new CloudRequestEngine([
             'resourceKey' => CloudResponse::noDataKey,
             'httpClient' => $this->mockHttp()
