@@ -21,9 +21,12 @@
  * such notice(s) shall fulfill the requirements of that article.
  * ********************************************************************* */
 
+declare(strict_types=1);
+
 namespace fiftyone\pipeline\cloudrequestengine;
 
 use fiftyone\pipeline\core\BasicListEvidenceKeyFilter;
+use fiftyone\pipeline\core\FlowData;
 use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\Engine;
 
@@ -31,26 +34,38 @@ use fiftyone\pipeline\engines\Engine;
 // Returns raw JSON as a "cloud" property under "cloud" dataKey
 class CloudRequestEngine extends Engine
 {
-    public $dataKey = 'cloud';
+    public string $dataKey = 'cloud';
 
     // Default base url
-    public $baseURL;
-    public $cloudRequestOrigin;
-    public $flowElementProperties = [];
-    public $resourceKey;
-    private $evidenceKeys = [];
-    private $httpClient;
+    public string $baseURL;
+    public ?string $cloudRequestOrigin;
 
     /**
-     * Constructor for CloudRequestEngine.
+     * @var array<string, array<string, array<string, bool|string>>>
+     */
+    public array $flowElementProperties = [];
+    public string $resourceKey;
+
+    /**
+     * @var array<string>
+     */
+    private array $evidenceKeys = [];
+    private HttpClient $httpClient;
+
+    /**
      * Settings should contain a resourceKey
      * and optionally:
      * 1) a cloudEndPoint to overwrite the default baseurl
-     * 2) an cloudRequestOrigin to use when sending requests to cloud.
+     * 2) a cloudRequestOrigin to use when sending requests to cloud.
      *
-     * @param array $settings
+     * @param array{
+     *     resourceKey?: string,
+     *     cloudEndPoint?: string,
+     *     cloudRequestOrigin?: string,
+     *     httpClient?: \fiftyone\pipeline\cloudrequestengine\HttpClient
+     * } $settings
      */
-    public function __construct($settings)
+    public function __construct(array $settings)
     {
         if (!isset($settings['resourceKey'])) {
             throw new \Exception('CloudRequestEngine needs a resource key');
@@ -80,16 +95,14 @@ class CloudRequestEngine extends Engine
         $this->httpClient = $settings['httpClient'] ?? new HttpClient();
         $this->cloudRequestOrigin = $settings['cloudRequestOrigin'] ?? null;
 
-        parent::__construct($settings);
+        parent::__construct();
     }
 
     /**
      * Instance of EvidenceKeyFilter based on the evidence keys fetched
      * from the cloud service by the private getEvidenceKeys() method.
-     *
-     * @return BasicListEvidenceKeyFilter
      */
-    public function getEvidenceKeyFilter()
+    public function getEvidenceKeyFilter(): BasicListEvidenceKeyFilter
     {
         return new BasicListEvidenceKeyFilter($this->evidenceKeys);
     }
@@ -99,10 +112,8 @@ class CloudRequestEngine extends Engine
      * Makes a request to the cloud service with the supplied resource key
      * and evidence and returns a JSON object that is then parsed by cloud engines
      * placed later in the pipeline.
-     *
-     * @param \fiftyone\pipeline\core\FlowData $flowData
      */
-    public function processInternal($flowData)
+    public function processInternal(FlowData $flowData): void
     {
         if (count($this->flowElementProperties) === 0) {
             $this->flowElementProperties = $this->getEngineProperties();
@@ -133,10 +144,9 @@ class CloudRequestEngine extends Engine
      * If there are evidence keys other than 'query.' that conflict then
      * this is unexpected so a warning will be logged.
      *
-     * @param \fiftyone\pipeline\core\FlowData $flowData
-     * @return array
+     * @return array<string, int|string>
      */
-    public function getContent($flowData)
+    public function getContent(FlowData $flowData): array
     {
         $queryData = [];
 
@@ -156,12 +166,12 @@ class CloudRequestEngine extends Engine
     /**
      * Add query data to the evidence.
      *
-     * @param array $queryData The destination Array to add query data to
-     * @param array $allEvidence All evidence in the flow data. This is used to report which evidence keys are conflicting
-     * @param mixed $evidence Evidence to add to the query Data
-     * @return array
+     * @param array<string, string> $queryData The destination Array to add query data to
+     * @param array<string, int|string> $allEvidence All evidence in the flow data. This is used to report which evidence keys are conflicting
+     * @param array<string, int|string> $evidence Evidence to add to the query Data
+     * @return array<string, int|string>
      */
-    public function addQueryData($queryData, $allEvidence, $evidence)
+    public function addQueryData(array $queryData, array $allEvidence, array $evidence): array
     {
         foreach ($evidence as $evidenceKey => $evidenceValue) {
             // Get the key parts
@@ -212,11 +222,11 @@ class CloudRequestEngine extends Engine
     /**
      * Get evidence with specified prefix.
      *
-     * @param array $evidence All evidence in the flow data
+     * @param array<string, int|string> $evidence All evidence in the flow data
      * @param string $type Required evidence key prefix
-     * @return array
+     * @return array<string, int|string>
      */
-    public function getSelectedEvidence($evidence, $type)
+    public function getSelectedEvidence(array $evidence, string $type): array
     {
         $selectedEvidence = [];
         if (strcmp($type, Constants::EVIDENCE_OTHER) == 0) {
@@ -248,7 +258,7 @@ class CloudRequestEngine extends Engine
      * @param string $prefix The prefix to check for
      * @return bool true if the key has the prefix
      */
-    public function keyHasPrefix($itemKey, $prefix)
+    public function keyHasPrefix(string $itemKey, string $prefix): bool
     {
         $key = explode(Constants::EVIDENCE_SEPERATOR, $itemKey);
 
@@ -258,9 +268,9 @@ class CloudRequestEngine extends Engine
     /**
      * Internal function for getting evidence keys used by cloud engines.
      *
-     * @return array List of keys
+     * @return array<string> List of keys
      */
-    private function getEvidenceKeys()
+    private function getEvidenceKeys(): array
     {
         $evidenceKeyRequest = $this->httpClient->makeCloudRequest(
             'GET',
@@ -275,9 +285,9 @@ class CloudRequestEngine extends Engine
     /**
      * Internal method to get properties for cloud engines from the cloud service.
      *
-     * @return array
+     * @return array<string, string|array<string, array<string, bool|string>>>
      */
-    private function getEngineProperties()
+    private function getEngineProperties(): array
     {
         // Get properties for all engines
 
@@ -310,14 +320,14 @@ class CloudRequestEngine extends Engine
      * Internal helper method to lowercase keys returned from the
      * cloud service.
      *
-     * @param array $arr
-     * @return array
+     * @param array<int|string, string|array<string, mixed>> $arr
+     * @return array<int|string, string|array<string, mixed>>
      */
-    private function lowerCaseArrayKeys($arr)
+    private function lowerCaseArrayKeys(array $arr): array
     {
         return array_map(function ($item) {
             if (is_array($item)) {
-                $item = $this->LowerCaseArrayKeys($item);
+                $item = $this->lowerCaseArrayKeys($item);
             }
 
             return $item;

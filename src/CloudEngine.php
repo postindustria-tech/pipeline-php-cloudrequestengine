@@ -21,9 +21,13 @@
  * such notice(s) shall fulfill the requirements of that article.
  * ********************************************************************* */
 
+declare(strict_types=1);
+
 namespace fiftyone\pipeline\cloudrequestengine;
 
 use fiftyone\pipeline\core\AspectPropertyValue;
+use fiftyone\pipeline\core\FlowData;
+use fiftyone\pipeline\core\Pipeline;
 use fiftyone\pipeline\engines\AspectDataDictionary;
 use fiftyone\pipeline\engines\CloudEngineBase;
 
@@ -36,16 +40,19 @@ use fiftyone\pipeline\engines\CloudEngineBase;
  */
 class CloudEngine extends CloudEngineBase
 {
-    public $dataKey = 'CloudEngineBase'; // This should be overridden
-    public $aspectProperties;
+    public string $dataKey = 'CloudEngineBase'; // This should be overridden
+
+    /**
+     * @var array<string, array<string, mixed>>
+     */
+    public array $aspectProperties;
 
     /**
      * Callback called when an engine is added to a pipeline.
      *
-     * @param \fiftyone\pipeline\core\Pipeline $pipeline
      * @throws \Exception
      */
-    public function onRegistration($pipeline)
+    public function onRegistration(Pipeline $pipeline): void
     {
         if (isset($pipeline->flowElementsList['cloud'])) {
             return;
@@ -54,7 +61,7 @@ class CloudEngine extends CloudEngineBase
         throw new \Exception(Constants::CLOUDREQUESTENGINE_EXCEPTION_MESSAGE);
     }
 
-    public function processInternal($flowData)
+    public function processInternal(FlowData $flowData): void
     {
         if (isset($flowData->pipeline->flowElementsList['cloud']->flowElementProperties[$this->dataKey])) {
             // set up properties list for the element from data in the CloudRequestEngine
