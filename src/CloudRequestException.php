@@ -33,16 +33,18 @@ class CloudRequestException extends \Exception
     public $responseHeaders;
 
     /**
-     * Constructor for CloudRequestException
+     * Constructor for CloudRequestException.
      * @param string Exception message
-     * @param integer The status code returned in the HTTP response
+     * @param int The status code returned in the HTTP response
      * @param array The HTTP headers returned in the response
+     * @param mixed $message
+     * @param mixed $httpStatusCode
+     * @param mixed $responseHeaders
      */
-    public function __construct($message, $httpStatusCode = 0, $responseHeaders = array()) {
-
+    public function __construct($message, $httpStatusCode = 0, $responseHeaders = [])
+    {
         parent::__construct($message);
         $this->httpStatusCode = $httpStatusCode;
         $this->responseHeaders = $responseHeaders;
-        
     }
 }
