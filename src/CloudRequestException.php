@@ -21,6 +21,8 @@
  * such notice(s) shall fulfill the requirements of that article.
  * ********************************************************************* */
 
+declare(strict_types=1);
+
 namespace fiftyone\pipeline\cloudrequestengine;
 
 /**
@@ -29,19 +31,20 @@ namespace fiftyone\pipeline\cloudrequestengine;
  */
 class CloudRequestException extends \Exception
 {
-    public $httpStatusCode;
-    public $responseHeaders;
+    public int $httpStatusCode;
+
+    /**
+     * @var array<int|string, string|array<string, mixed>>
+     */
+    public array $responseHeaders;
 
     /**
      * Constructor for CloudRequestException.
-     * @param string Exception message
-     * @param int The status code returned in the HTTP response
-     * @param array The HTTP headers returned in the response
-     * @param mixed $message
-     * @param mixed $httpStatusCode
-     * @param mixed $responseHeaders
+     * @param string $message Exception message
+     * @param int $httpStatusCode The status code returned in the HTTP response
+     * @param array<int|string, string|array<string, mixed>> $responseHeaders The HTTP headers returned in the response 
      */
-    public function __construct($message, $httpStatusCode = 0, $responseHeaders = [])
+    public function __construct(string $message, int $httpStatusCode = 0, array $responseHeaders = [])
     {
         parent::__construct($message);
         $this->httpStatusCode = $httpStatusCode;

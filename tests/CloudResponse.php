@@ -112,7 +112,7 @@ class CloudResponse extends CloudRequestEngineTestsBase
         ]);
 
         try {
-            $engine->process(null);
+            $engine->process($this->createMock(FlowData::class));
         } catch (CloudRequestException $exception) {
             $this->assertStringContainsString(CloudResponse::invalidKey, $exception->getMessage());
         }
@@ -136,7 +136,7 @@ class CloudResponse extends CloudRequestEngineTestsBase
         ]);
 
         try {
-            $engine->process(null);
+            $engine->process($this->createMock(FlowData::class));
         } catch (CloudRequestException $exception) {
             $this->assertStringContainsString(CloudResponse::noDataKeyMessageComplete, $exception->getMessage());
         }

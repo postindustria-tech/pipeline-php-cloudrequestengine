@@ -21,6 +21,8 @@
  * such notice(s) shall fulfill the requirements of that article.
  * ********************************************************************* */
 
+declare(strict_types=1);
+
 namespace fiftyone\pipeline\cloudrequestengine;
 
 class HttpClient
@@ -31,14 +33,14 @@ class HttpClient
      *
      * @param string $type Method use to send HTTP request
      * @param string $url
-     * @param mixed $content Data to be sent in the post body
-     * @param mixed $originHeader The value to use for the Origin header
+     * @param null|string $content Data to be sent in the post body
+     * @param null|string $originHeader The value to use for the Origin header
      * @return string Associative array with data and error properties error contains any errors from the request, data contains the response
      */
-    public function makeCloudRequest($type, $url, $content, $originHeader)
+    public function makeCloudRequest(string $type, string $url, ?string $content, ?string $originHeader): string
     {
         $headerText = '';
-        if (isset($originHeader)) {
+        if (!empty($originHeader)) {
             $headerText .= 'Origin: ' . $originHeader;
         }
 
@@ -61,15 +63,14 @@ class HttpClient
             return $data;
         }
 
-        $responseHeaders = [];
         $ch = curl_init($url);
         curl_setopt($ch, CURLOPT_HEADER, true);
-        if (isset($originHeader)) {
+        if (!empty($originHeader)) {
             curl_setopt($ch, CURLOPT_HTTPHEADER, [
                 $headerText
             ]);
         }
-        if (isset($type) && strcasecmp($type, 'POST') == 0) {
+        if (!empty($type) && strcasecmp($type, 'POST') === 0) {
             curl_setopt($ch, CURLOPT_POST, true);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $content);
             curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -97,10 +98,10 @@ class HttpClient
     /**
      * Parser function to get formatted headers.
      *
-     * @param array $headers
-     * @return array
+     * @param array<string> $headers
+     * @return array<string, string>
      */
-    public function parseHeaders($headers)
+    public function parseHeaders(array $headers): array
     {
         $head = [];
         foreach ($headers as $k => $v) {
@@ -114,10 +115,10 @@ class HttpClient
     }
 
     /**
-     * @param array $http_response_header
+     * @param null|array<string> $http_response_header
      * @return int
      */
-    private function getHttpCode($http_response_header)
+    private function getHttpCode(?array $http_response_header): int
     {
         if (is_array($http_response_header)) {
             $parts = explode(' ', $http_response_header[0]);
@@ -129,7 +130,11 @@ class HttpClient
         return 0;
     }
 
-    private function validateResponse($cloudResponse, $httpStatusCode, $httpResponseHeaders, $url)
+    /**
+     * @param array<string> $httpResponseHeaders
+     * @throws \fiftyone\pipeline\cloudrequestengine\CloudRequestException
+     */
+    private function validateResponse(string $cloudResponse, int $httpStatusCode, array $httpResponseHeaders, string $url): void
     {
         $message = null;
 
