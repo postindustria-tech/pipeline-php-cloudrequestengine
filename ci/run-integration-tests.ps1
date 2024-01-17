@@ -10,7 +10,7 @@ if (!$Keys.TestResourceKey) {
     return
 }
 
-$env:RESOURCEKEY = $Keys.TestResourceKey
+$env:resource_key = $Keys.TestResourceKey
 
 ./php/run-integration-tests.ps1 -RepoName $RepoName
 
