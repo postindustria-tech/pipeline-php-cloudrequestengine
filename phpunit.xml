@@ -1,6 +1,6 @@
 <phpunit bootstrap="vendor/autoload.php">
   <php>
-    <env name="RESOURCEKEY" value="!!YOUR_RESOURCE_KEY!!"/>
+    <env name="resource_key" value="!!YOUR_RESOURCE_KEY!!"/>
   </php>
   <testsuites>
     <testsuite name="Unit">

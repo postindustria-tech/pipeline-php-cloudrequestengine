@@ -33,7 +33,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 {
     public function testCloudRequestEngine()
     {
-        $params = ['resourceKey' => $_ENV['RESOURCEKEY']];
+        $params = ['resourceKey' => $this->getResourceKey()];
 
         $this->assertNotSame(
             '!!YOUR_RESOURCE_KEY!!',
@@ -73,7 +73,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
      */
     public function testCloudPostRequestWithSequenceEvidence()
     {
-        $params = ['resourceKey' => $_ENV['RESOURCEKEY']];
+        $params = ['resourceKey' => $this->getResourceKey()];
 
         $this->assertNotSame(
             '!!YOUR_RESOURCE_KEY!!',
@@ -121,7 +121,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
         $httpClient = new HttpClient();
 
         $params = [
-            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'resourceKey' => $this->getResourceKey(),
             'httpClient' => $httpClient
         ];
 
@@ -202,7 +202,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
     public function testPipelineSuppressesExceptionsWhenCloudServiceIsDown()
     {
         $params = [
-            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'resourceKey' => $this->getResourceKey(),
             'httpClient' => $this->mockHttp()
         ];
 
@@ -246,7 +246,7 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
     public function testPipelineDoesNotSuppressExceptionsWhenCloudServiceIsDown()
     {
         $params = [
-            'resourceKey' => $_ENV['RESOURCEKEY'],
+            'resourceKey' => $this->getResourceKey(),
             'httpClient' => $this->mockHttp()
         ];
 
@@ -276,5 +276,10 @@ class CloudRequestTests extends CloudRequestEngineTestsBase
 
         $this->expectException(CloudRequestException::class);
         $fd->process();
+    }
+
+    private function getResourceKey()
+    {
+        return $_ENV[self::resourceKey] ?? null;
     }
 }
