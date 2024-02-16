@@ -1,6 +1,9 @@
 {
     "name": "51degrees/fiftyone.pipeline.cloudrequestengine",
-    "description": "Cloud request engine for 51Degrees Pipeline API - Used to send requests to the 51Degrees cloud service",
+    "description": "Cloud request engine for 51Degrees Pipeline API. Used to send requests to the 51Degrees cloud service.",
+    "keywords": [ 
+        "51degrees" 
+    ],
     "authors" : [
         {
             "name": "51Degrees Engineering",
