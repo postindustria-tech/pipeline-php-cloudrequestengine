@@ -95,6 +95,32 @@ class CloudResponse extends CloudRequestEngineTestsBase
     }
 
     /**
+     * Verify that getEngineProperties() can be called directly
+     * (without processInternal()) and that it both returns the
+     * expected engines and populates $engine->flowElementProperties.
+     */
+    public function testGetEnginePropertiesEager()
+    {
+        $engine = new CloudRequestEngine([
+            'resourceKey' => 'subpropertieskey',
+            'httpClient' => $this->mockHttp()
+        ]);
+
+        // flowElementProperties should be empty before any call
+        $this->assertEmpty($engine->flowElementProperties);
+
+        $result = $engine->getEngineProperties();
+
+        // Return value should contain expected engines
+        $this->assertArrayHasKey('device', $result);
+        $this->assertArrayHasKey('devices', $result);
+
+        // flowElementProperties should now also be populated
+        $this->assertEquals($result, $engine->flowElementProperties);
+        $this->assertEquals(2, count($engine->flowElementProperties));
+    }
+
+    /**
      * Test cloud request engine handles errors from the cloud service
      * as expected.
      * An exception should be thrown by the cloud request engine

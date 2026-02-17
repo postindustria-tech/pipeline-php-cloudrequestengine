@@ -266,28 +266,11 @@ class CloudRequestEngine extends Engine
     }
 
     /**
-     * Internal function for getting evidence keys used by cloud engines.
-     *
-     * @return array<string> List of keys
-     */
-    private function getEvidenceKeys(): array
-    {
-        $evidenceKeyRequest = $this->httpClient->makeCloudRequest(
-            'GET',
-            $this->baseURL . 'evidencekeys',
-            null,
-            $this->cloudRequestOrigin
-        );
-
-        return json_decode($evidenceKeyRequest, true);
-    }
-
-    /**
-     * Internal method to get properties for cloud engines from the cloud service.
+     * Get properties for cloud engines from the cloud service.
      *
      * @return array<string, string|array<string, array<string, bool|string>>>
      */
-    private function getEngineProperties(): array
+    public function getEngineProperties(): array
     {
         // Get properties for all engines
 
@@ -313,15 +296,34 @@ class CloudRequestEngine extends Engine
             }
         }
 
+        $this->flowElementProperties = $flowElementProperties;
+
         return $flowElementProperties;
+    }
+
+    /**
+     * Internal function for getting evidence keys used by cloud engines.
+     *
+     * @return array<string> List of keys
+     */
+    private function getEvidenceKeys(): array
+    {
+        $evidenceKeyRequest = $this->httpClient->makeCloudRequest(
+            'GET',
+            $this->baseURL . 'evidencekeys',
+            null,
+            $this->cloudRequestOrigin
+        );
+
+        return json_decode($evidenceKeyRequest, true);
     }
 
     /**
      * Internal helper method to lowercase keys returned from the
      * cloud service.
      *
-     * @param array<int|string, string|array<string, mixed>> $arr
-     * @return array<int|string, string|array<string, mixed>>
+     * @param array<int|string, array<string, mixed>|string> $arr
+     * @return array<int|string, array<string, mixed>|string>
      */
     private function lowerCaseArrayKeys(array $arr): array
     {
